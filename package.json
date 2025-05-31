@@ -29,6 +29,7 @@
     "typescript-eslint": "^8.33.0"
   },
   "dependencies": {
-    "@prisma/client": "^6.8.2"
+    "@prisma/client": "^6.8.2",
+    "argon2": "^0.43.0"
   }
 }
