@@ -9,6 +9,12 @@ describe("Resultado", () => {
     expect(result.data).toBe("Dados do usuário");
   });
 
+  it("permite devolver sucesso sem dados", () => {
+    const result = Result.success<undefined>();
+    expect(result.ok).toBe(true);
+    expect(result.data).toBeUndefined();
+  });
+
   it("deve criar um resultado de falha", () => {
     const result = Result.failure("Erro ao criar usuário");
     expect(result.ok).toBe(false);

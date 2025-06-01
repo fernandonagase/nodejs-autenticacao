@@ -9,7 +9,7 @@ export class Result<T> {
     this.error = error;
   }
 
-  static success<T>(data: T): Result<T> {
+  static success<T>(data?: T): Result<T> {
     return new Result<T>(true, data);
   }
 
