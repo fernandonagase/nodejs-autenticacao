@@ -2,7 +2,7 @@ import { Hasher } from "../../tools/interfaces/hasher.js";
 import { Result } from "../../tools/result.js";
 
 export class User {
-  // id: string;
+  id?: number;
   username: string;
   firstName: string;
   email: string;
