@@ -6,6 +6,7 @@ export class User {
   username: string;
   firstName: string;
   email: string;
+  #password?: string;
   createdAt: Date;
   updatedAt: Date;
   hasher: Hasher;
@@ -26,6 +27,10 @@ export class User {
     this.hasher = hasher;
   }
 
+  get password(): string | undefined {
+    return this.#password;
+  }
+
   async hashPassword(password: string): Promise<Result<string>> {
     const result = await this.hasher.hash(password);
     return result.ok && result.data
@@ -41,5 +46,14 @@ export class User {
     return result.ok && result.data
       ? Result.success(result.data)
       : Result.failure("Erro ao validar a senha");
+  }
+
+  async setPassword(password: string): Promise<Result<void>> {
+    const result = await this.hashPassword(password);
+    if (!result.ok || !result.data) {
+      return Result.failure(result.error || "Erro ao criar hash da senha");
+    }
+    this.#password = result.data;
+    return Result.success();
   }
 }

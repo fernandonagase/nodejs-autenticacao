@@ -1,4 +1,4 @@
-import { describe, expect, it } from "@jest/globals";
+import { describe, expect, it, jest } from "@jest/globals";
 import { User } from "../user.js";
 import { Argon2idHasher } from "../../../tools/argon2idHasher.js";
 
@@ -57,5 +57,24 @@ describe("Modelo de Usuario", () => {
       expect(isValid.ok).toBe(true);
       expect(isValid.data).toBe(true);
     }
+  });
+
+  it("deve definir a senha do usuário com hash", async () => {
+    const now = new Date();
+    const user = new User(
+      "johndoe",
+      "John",
+      "johndoe@example.com",
+      now,
+      now,
+      new Argon2idHasher(),
+    );
+    const spy = jest.spyOn(user, "hashPassword");
+
+    const result = await user.setPassword("password123");
+    expect(result.ok).toBe(true);
+    expect(spy).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalledWith("password123");
+    expect(user.password).toBeDefined();
   });
 });
