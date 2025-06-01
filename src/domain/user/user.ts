@@ -32,4 +32,14 @@ export class User {
       ? Result.success(result.data)
       : Result.failure("Erro ao criar o hash da senha");
   }
+
+  async validatePassword(
+    password: string,
+    hashed: string,
+  ): Promise<Result<boolean>> {
+    const result = await this.hasher.validate(password, hashed);
+    return result.ok && result.data
+      ? Result.success(result.data)
+      : Result.failure("Erro ao validar a senha");
+  }
 }
