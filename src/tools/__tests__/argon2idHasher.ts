@@ -1,5 +1,5 @@
 import { describe, expect, it } from "@jest/globals";
-import { Argon2idHasher } from "../../../tools/argon2idHasher.js";
+import { Argon2idHasher } from "../argon2idHasher.js";
 
 describe("Argon2idHasher", () => {
   it("deve fazer o hash de uma senha", async () => {
