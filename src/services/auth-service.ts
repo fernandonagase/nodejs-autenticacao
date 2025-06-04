@@ -30,4 +30,22 @@ async function signup(
   return Result.success(userResult.data);
 }
 
-export { signup };
+async function signin(
+  username: string,
+  password: string,
+): Promise<Result<User>> {
+  const userRepository = new UserRepository();
+  const userResult = await userRepository.findByUsername(username);
+  if (!userResult.ok || !userResult.data) {
+    return Result.failure(
+      userResult.error ?? "Nome de usuário ou senha incorretos",
+    );
+  }
+  const validationResult = await userResult.data.validatePassword(password);
+  if (!validationResult.ok || !validationResult.data) {
+    return Result.failure("Nome de usuário ou senha incorretos");
+  }
+  return Result.success(userResult.data);
+}
+
+export { signup, signin };
