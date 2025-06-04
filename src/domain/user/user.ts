@@ -31,6 +31,10 @@ export class User {
     return this.#password;
   }
 
+  set password(value: string) {
+    this.#password = value;
+  }
+
   async hashPassword(password: string): Promise<Result<string>> {
     const result = await this.hasher.hash(password);
     return result.ok && result.data
@@ -38,16 +42,19 @@ export class User {
       : Result.failure("Erro ao criar o hash da senha");
   }
 
-  async validatePassword(
-    password: string,
-    hashed: string,
-  ): Promise<Result<boolean>> {
-    const result = await this.hasher.validate(password, hashed);
-    return result.ok && result.data
-      ? Result.success(result.data)
-      : Result.failure("Erro ao validar a senha");
+  async validatePassword(password: string): Promise<Result<boolean>> {
+    if (!this.#password) {
+      return Result.success(false);
+    }
+    const result = await this.hasher.validate(password, this.#password);
+    if (result.ok && typeof result.data === "boolean") {
+      return Result.success(result.data);
+    }
+    return Result.failure("Erro ao validar a senha");
   }
 
+  // Define a senha do usuário passando por função de hash
+  // ao contrário do setter password, que só define a senha
   async setPassword(password: string): Promise<Result<void>> {
     const result = await this.hashPassword(password);
     if (!result.ok || !result.data) {

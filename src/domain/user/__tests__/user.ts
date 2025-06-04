@@ -45,15 +45,12 @@ describe("Modelo de Usuario", () => {
       now,
       new Argon2idHasher(),
     );
-    const hashedPassword = await user.hashPassword("password123");
+    await user.setPassword("password123");
 
-    expect(hashedPassword.ok).toBe(true);
-    expect(typeof hashedPassword.data).toBe("string");
-    if (hashedPassword.data) {
-      const isValid = await user.validatePassword(
-        "password123",
-        hashedPassword.data,
-      );
+    expect(user.password).toBeDefined();
+    expect(typeof user.password).toBe("string");
+    if (user.password) {
+      const isValid = await user.validatePassword("password123");
       expect(isValid.ok).toBe(true);
       expect(isValid.data).toBe(true);
     }
