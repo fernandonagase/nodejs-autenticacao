@@ -1,3 +1,5 @@
+import jwt from "jsonwebtoken";
+
 import { Hasher } from "../../tools/interfaces/hasher.js";
 import { Result } from "../../tools/result.js";
 
@@ -62,5 +64,16 @@ export class User {
     }
     this.#password = result.data;
     return Result.success();
+  }
+
+  issueJWT(secret: string): Result<string> {
+    let token: string;
+    try {
+      token = jwt.sign({ sub: this.id }, secret, { expiresIn: "1h" });
+    } catch (error) {
+      console.error("Erro ao gerar token JWT: ", error);
+      return Result.failure("Erro ao gerar token JWT");
+    }
+    return Result.success(token);
   }
 }
