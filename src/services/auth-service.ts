@@ -33,7 +33,7 @@ async function signup(
 async function signin(
   username: string,
   password: string,
-): Promise<Result<User>> {
+): Promise<Result<string>> {
   const userRepository = new UserRepository();
   const userResult = await userRepository.findByUsername(username);
   if (!userResult.ok || !userResult.data) {
@@ -45,7 +45,18 @@ async function signin(
   if (!validationResult.ok || !validationResult.data) {
     return Result.failure("Nome de usuário ou senha incorretos");
   }
-  return Result.success(userResult.data);
+  const genericErrorMessage =
+    "Não foi possível fazer login, tente novamente mais tarde";
+  if (!process.env.JWT_SECRET) {
+    console.error("JWT_SECRET não está definido");
+    return Result.failure(genericErrorMessage);
+  }
+  const jwtResult = userResult.data.issueJWT(process.env.JWT_SECRET);
+  if (!jwtResult.ok || !jwtResult.data) {
+    console.error("Erro ao emitir JWT:", jwtResult.error);
+    return Result.failure(genericErrorMessage);
+  }
+  return Result.success(jwtResult.data);
 }
 
 export { signup, signin };

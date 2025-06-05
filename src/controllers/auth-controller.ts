@@ -34,7 +34,7 @@ async function signin(req: Request, res: Response) {
       error: result.error,
     });
   }
-  res.status(200).json(result.data);
+  res.status(200).json({ token: result.data });
 }
 
 export { signup, signin };
