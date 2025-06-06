@@ -94,4 +94,70 @@ describe("Modelo de Usuario", () => {
     const result = user.issueJWT("");
     expect(result.ok).toBe(false);
   });
+
+  it("gera um token de confirmação de e-mail", () => {
+    const secret = "mysecretkey-12345678-confirmation-jwt-testing";
+    const result = user.generateConfirmationToken(secret);
+    expect(result.ok).toBe(true);
+    if (!result.data || typeof result.data !== "string") {
+      throw new Error("Token de confirmação vazio");
+    }
+    const decoded = jwt.verify(result.data, secret) as jwt.JwtPayload;
+    expect(decoded).toHaveProperty("jti");
+    expect(decoded).toHaveProperty("sub");
+    expect(decoded).toHaveProperty("exp");
+    if (typeof decoded.exp === "number") {
+      expect(decoded.exp * 1000).toBeGreaterThan(Date.now());
+    } else {
+      throw new Error("exp não está presente no payload do JWT");
+    }
+  });
+
+  it("deve falhar ao gerar token de confirmação se email não estiver definido", () => {
+    const secret = "mysecretkey-12345678-confirmation-jwt-testing";
+    user.email = ""; // Simulando email não definido
+    const result = user.generateConfirmationToken(secret);
+    expect(result.ok).toBe(false);
+  });
+
+  it("should generate different tokens for users with different emails", () => {
+    const secret = "mysecretkey-12345678-confirmation-jwt-testing";
+    const now = new Date();
+    const userA = new User(
+      "userA",
+      "UserA",
+      "userA@example.com",
+      now,
+      now,
+      new Argon2idHasher(),
+    );
+    const userB = new User(
+      "userB",
+      "UserB",
+      "userB@example.com",
+      now,
+      now,
+      new Argon2idHasher(),
+    );
+
+    const tokenA = userA.generateConfirmationToken(secret);
+    const tokenB = userB.generateConfirmationToken(secret);
+
+    expect(tokenA.ok).toBe(true);
+    expect(tokenB.ok).toBe(true);
+    expect(tokenA.data).not.toBe(tokenB.data);
+
+    const decodedA = jwt.verify(
+      tokenA.data as string,
+      secret,
+    ) as jwt.JwtPayload;
+    const decodedB = jwt.verify(
+      tokenB.data as string,
+      secret,
+    ) as jwt.JwtPayload;
+
+    expect(decodedA.sub).toBe("userA@example.com");
+    expect(decodedB.sub).toBe("userB@example.com");
+    expect(decodedA.jti).not.toBe(decodedB.jti);
+  });
 });

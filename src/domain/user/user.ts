@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
 
 import { Hasher } from "../../tools/interfaces/hasher.js";
 import { Result } from "../../tools/result.js";
@@ -73,6 +74,22 @@ export class User {
     } catch (error) {
       console.error("Erro ao gerar token JWT: ", error);
       return Result.failure("Erro ao gerar token JWT");
+    }
+    return Result.success(token);
+  }
+
+  generateConfirmationToken(secret: string): Result<string> {
+    if (!this.email) {
+      return Result.failure("Email do usuário não definido");
+    }
+    let token: string;
+    try {
+      token = jwt.sign({ sub: this.email, jti: uuidv4() }, secret, {
+        expiresIn: "15m",
+      });
+    } catch (error) {
+      console.error("Erro ao gerar token de confirmação: ", error);
+      return Result.failure("Erro ao gerar token de confirmação");
     }
     return Result.success(token);
   }
