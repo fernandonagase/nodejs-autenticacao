@@ -15,11 +15,12 @@ datasource db {
 }
 
 model Usuario {
-  idusuario   Int      @id @default(autoincrement())
-  nomeusuario String   @unique @db.VarChar(45)
-  nome        String   @db.VarChar(50)
-  email       String   @unique @db.VarChar(150)
-  senha       String   @db.VarChar(100)
-  criado_em   DateTime @default(now())
-  alterado_em DateTime @updatedAt
+  idusuario        Int      @id @default(autoincrement())
+  nomeusuario      String   @unique @db.VarChar(45)
+  nome             String   @db.VarChar(50)
+  email            String   @unique @db.VarChar(150)
+  senha            String   @db.VarChar(100)
+  criado_em        DateTime @default(now())
+  alterado_em      DateTime @updatedAt
+  email_verificado Boolean  @default(false)
 }
