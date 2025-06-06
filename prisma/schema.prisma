@@ -24,3 +24,9 @@ model Usuario {
   alterado_em      DateTime @updatedAt
   email_verificado Boolean  @default(false)
 }
+
+model ConfirmacaoEmail {
+  id_token    String   @id @db.Uuid
+  email       String   @db.VarChar(150)
+  expirado_em DateTime
+}
