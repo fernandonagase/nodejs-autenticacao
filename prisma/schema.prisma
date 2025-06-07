@@ -15,19 +15,21 @@ datasource db {
 }
 
 model Usuario {
-  idusuario        Int      @id @default(autoincrement())
-  nomeusuario      String   @unique @db.VarChar(45)
-  nome             String   @db.VarChar(50)
-  email            String   @unique @db.VarChar(150)
-  senha            String   @db.VarChar(100)
-  criado_em        DateTime @default(now())
-  alterado_em      DateTime @updatedAt
-  email_verificado Boolean  @default(false)
+  idusuario        Int                @id @default(autoincrement())
+  nomeusuario      String             @unique @db.VarChar(45)
+  nome             String             @db.VarChar(50)
+  email            String             @unique @db.VarChar(150)
+  senha            String             @db.VarChar(100)
+  criado_em        DateTime           @default(now())
+  alterado_em      DateTime           @updatedAt
+  email_verificado Boolean            @default(false)
+  ConfirmacaoEmail ConfirmacaoEmail[]
 }
 
 model ConfirmacaoEmail {
   id_token    String   @id @db.Uuid
-  email       String   @db.VarChar(150)
+  usuario     Usuario  @relation(fields: [usuario_id], references: [idusuario])
+  usuario_id  Int
   expirado_em DateTime
   revogado    Boolean  @default(false)
 }
