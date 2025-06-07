@@ -26,7 +26,23 @@ const JwtEmailConfirmationAuthority: IEmailConfirmationAuthority = {
     token: string,
     secret: string,
   ): Result<{ isValid: boolean; payload?: EmailConfirmation }> {
-    throw new Error("Method not implemented.");
+    try {
+      const decoded = jwt.verify(token, secret) as jwt.JwtPayload;
+      if (decoded && decoded.sub && decoded.jti) {
+        return Result.success({
+          isValid: true,
+          payload: {
+            token,
+            tokenId: decoded.jti,
+            email: decoded.sub,
+          },
+        });
+      }
+      return Result.success({ isValid: false });
+    } catch (error) {
+      console.error("Erro ao validar token de confirmação: ", error);
+      return Result.failure("Token de confirmação inválido");
+    }
   },
 };
 

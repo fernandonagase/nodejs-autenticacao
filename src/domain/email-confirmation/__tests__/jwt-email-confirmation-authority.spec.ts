@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { JwtEmailConfirmationAuthority } from "../jwt-email-confirmation-authority.js";
 
 describe("JWT Email Confirmation Authority", () => {
-  const { issue } = JwtEmailConfirmationAuthority;
+  const { issue, validate } = JwtEmailConfirmationAuthority;
 
   const email = "john@example.com";
   const secret = "mysecretkey-12345678-hello-jwt-testing";
@@ -20,5 +20,41 @@ describe("JWT Email Confirmation Authority", () => {
     expect(decoded).toHaveProperty("sub", email);
     expect(decoded).toHaveProperty("exp");
     expect(decoded.exp).toBeGreaterThan(Date.now() / 1000);
+  });
+
+  it("deve aprovar um token de confirmação de e-mail válido", () => {
+    const issueResult = issue(email, secret);
+    if (!issueResult.ok || !issueResult.data) {
+      throw new Error("Token de confirmação não foi emitido");
+    }
+    const validateResult = validate(issueResult.data.token, secret);
+    expect(validateResult.ok).toBe(true);
+    if (!validateResult.data) {
+      throw new Error("Resposta de validação vazia");
+    }
+    expect(validateResult.data.isValid).toBe(true);
+    expect(validateResult.data.payload).toEqual(issueResult.data);
+  });
+
+  it("deve rejeitar um token de confirmação de e-mail mal-formado", () => {
+    const invalidToken = "invalid.token.here";
+    const validateResult = validate(invalidToken, secret);
+    expect(validateResult.ok).toBe(false);
+    expect(validateResult.data).toBeUndefined();
+    expect(typeof validateResult.error).toBe("string");
+    expect((validateResult.error as string).length).toBeGreaterThan(0);
+  });
+
+  it("deve rejeitar um token de confirmação semanticamente inválido", () => {
+    const tokenWithoutJti =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqb2huQGV4YW1wbGUuY29tIn0.8s3vI0sVDXTyC0Elw4bS3dgJmAonSDuyoN5uoeS90ac";
+    let validateResult = validate(tokenWithoutJti, secret);
+    expect(validateResult.ok).toBe(true);
+    expect(validateResult.data?.isValid).toBe(false);
+    const tokenWithoutSub =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlNWU3YzJiNi03YjNhLTRjMmUtOWIyYS0yZThlNWUyYzdhMWYifQ.2aV5YgHo-zaPcCWzW4GpHycrLG3NUUpCudLtaGLYldI";
+    validateResult = validate(tokenWithoutSub, secret);
+    expect(validateResult.ok).toBe(true);
+    expect(validateResult.data?.isValid).toBe(false);
   });
 });
