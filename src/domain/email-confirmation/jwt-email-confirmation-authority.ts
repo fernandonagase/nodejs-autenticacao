@@ -10,12 +10,14 @@ const JwtEmailConfirmationAuthority: IEmailConfirmationAuthority = {
     const payload = {
       sub: userId,
       jti: uuidv4(),
+      exp: Math.floor(Date.now() / 1000) + 3600, // 1 hora
     };
     try {
       return Result.success({
-        token: jwt.sign(payload, secret, { expiresIn: "1h" }),
+        token: jwt.sign(payload, secret),
         tokenId: payload.jti,
         userId: payload.sub,
+        exp: payload.exp,
       });
     } catch (error) {
       console.error("Erro ao gerar token de confirmação: ", error);
@@ -33,13 +35,14 @@ const JwtEmailConfirmationAuthority: IEmailConfirmationAuthority = {
       console.error("Erro ao validar token de confirmação: ", error);
       return Result.failure("Token de confirmação inválido");
     }
-    if (decoded && decoded.jti && !isNaN(Number(decoded.sub))) {
+    if (decoded && decoded.jti && !isNaN(Number(decoded.sub)) && decoded.exp) {
       return Result.success({
         isValid: true,
         payload: {
           token,
           tokenId: decoded.jti,
           userId: Number(decoded.sub),
+          exp: decoded.exp,
         },
       });
     }
