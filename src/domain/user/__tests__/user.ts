@@ -42,7 +42,7 @@ describe("Modelo de Usuario", () => {
     }
   });
 
-  it("deve criar o hash de uma senha", async () => {
+  it("deve validar o hash de uma senha", async () => {
     await user.setPassword("password123");
 
     expect(user.password).toBeDefined();
