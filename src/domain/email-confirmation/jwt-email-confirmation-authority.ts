@@ -6,43 +6,44 @@ import { IEmailConfirmationAuthority } from "../interfaces/email-confirmation-au
 import { EmailConfirmation } from "./email-confirmation.type.js";
 
 const JwtEmailConfirmationAuthority: IEmailConfirmationAuthority = {
-  issue(email: string, secret: string): Result<EmailConfirmation> {
+  issueToken(userId: number, secret: string): Result<EmailConfirmation> {
     const payload = {
-      sub: email,
+      sub: userId,
       jti: uuidv4(),
     };
     try {
       return Result.success({
         token: jwt.sign(payload, secret, { expiresIn: "1h" }),
         tokenId: payload.jti,
-        email: payload.sub,
+        userId: payload.sub,
       });
     } catch (error) {
       console.error("Erro ao gerar token de confirmação: ", error);
       return Result.failure("Erro ao gerar token de confirmação");
     }
   },
-  validate(
+  validateToken(
     token: string,
     secret: string,
   ): Result<{ isValid: boolean; payload?: EmailConfirmation }> {
+    let decoded: jwt.JwtPayload;
     try {
-      const decoded = jwt.verify(token, secret) as jwt.JwtPayload;
-      if (decoded && decoded.sub && decoded.jti) {
-        return Result.success({
-          isValid: true,
-          payload: {
-            token,
-            tokenId: decoded.jti,
-            email: decoded.sub,
-          },
-        });
-      }
-      return Result.success({ isValid: false });
+      decoded = jwt.verify(token, secret) as jwt.JwtPayload;
     } catch (error) {
       console.error("Erro ao validar token de confirmação: ", error);
       return Result.failure("Token de confirmação inválido");
     }
+    if (decoded && decoded.jti && !isNaN(Number(decoded.sub))) {
+      return Result.success({
+        isValid: true,
+        payload: {
+          token,
+          tokenId: decoded.jti,
+          userId: Number(decoded.sub),
+        },
+      });
+    }
+    return Result.success({ isValid: false });
   },
 };
 
