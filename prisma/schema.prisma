@@ -29,4 +29,5 @@ model ConfirmacaoEmail {
   id_token    String   @id @db.Uuid
   email       String   @db.VarChar(150)
   expirado_em DateTime
+  revogado    Boolean  @default(false)
 }
