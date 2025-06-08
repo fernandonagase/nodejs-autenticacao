@@ -18,7 +18,7 @@ router.post("/signin", (req, res) => {
   signin(req, res);
 });
 
-router.post("/confirm-email", (req, res) => {
+router.post("/send-email-confirmation", (req, res) => {
   sendEmailConfirmation(req, res);
 });
 
