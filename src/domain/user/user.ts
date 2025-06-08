@@ -13,6 +13,7 @@ export class User {
   createdAt: Date;
   updatedAt: Date;
   hasher: Hasher;
+  verifiedEmail = false;
 
   constructor(
     username: string,
