@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import {
   signup as doSignup,
   signin as doSignin,
+  issueConfirmationToken,
 } from "../services/auth-service.js";
 
 async function signup(req: Request, res: Response) {
@@ -37,4 +38,20 @@ async function signin(req: Request, res: Response) {
   res.status(200).json({ token: result.data });
 }
 
-export { signup, signin };
+async function sendEmailConfirmation(req: Request, res: Response) {
+  const { userId } = req.body;
+  if (!userId) {
+    return res.status(400).json({
+      error: "Campo userId obrigatório",
+    });
+  }
+  const emailConfirmationToken = await issueConfirmationToken(userId);
+  if (!emailConfirmationToken.ok) {
+    return res.status(500).json({
+      error: "Não foi possível enviar a confirmação de email",
+    });
+  }
+  res.status(200).json({ token: emailConfirmationToken.data });
+}
+
+export { signup, signin, sendEmailConfirmation };
