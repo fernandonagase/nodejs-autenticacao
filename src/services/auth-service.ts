@@ -121,6 +121,12 @@ async function confirmUserEmail(token: string): Promise<Result<void>> {
     console.error("Usuário do token não corresponde ao usuário da confirmação");
     return Result.failure("Não foi possível confirmar o email do usuário");
   }
+  if (findResult.data.revoked) {
+    console.error("Token revogado");
+    return Result.failure(
+      "Confirmação de e-mail expirada. Por favor, solicite um novo link de confirmação.",
+    );
+  }
   const userRepository = new UserRepository();
   const userResult = await userRepository.findById(findResult.data.userId);
   if (!userResult.ok || !userResult.data) {
