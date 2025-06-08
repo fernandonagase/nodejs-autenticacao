@@ -8,13 +8,23 @@ const EmailConfirmationRepository: IEmailConfirmationRepository = {
     emailConfirmation: EmailConfirmation,
   ): Promise<Result<void>> {
     try {
-      await prisma.confirmacaoEmail.create({
-        data: {
-          id_token: emailConfirmation.tokenId,
-          usuario_id: emailConfirmation.userId,
-          expirado_em: new Date(emailConfirmation.exp * 1000),
-        },
-      });
+      await prisma.$transaction([
+        prisma.confirmacaoEmail.updateMany({
+          where: {
+            usuario_id: emailConfirmation.userId,
+          },
+          data: {
+            revogado: true,
+          },
+        }),
+        prisma.confirmacaoEmail.create({
+          data: {
+            id_token: emailConfirmation.tokenId,
+            usuario_id: emailConfirmation.userId,
+            expirado_em: new Date(emailConfirmation.exp * 1000),
+          },
+        }),
+      ]);
     } catch (error) {
       console.error("Erro ao criar confirmação de email:", error);
       return Result.failure("Erro ao criar confirmação de email");
