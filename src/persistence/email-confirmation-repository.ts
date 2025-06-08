@@ -1,6 +1,9 @@
 import { EmailConfirmation } from "../domain/email-confirmation/email-confirmation.type.js";
 import { Result } from "../tools/result.js";
-import { IEmailConfirmationRepository } from "./interfaces/email-confirmation-repository.js";
+import {
+  FindEmailConfirmationReturnType,
+  IEmailConfirmationRepository,
+} from "./interfaces/email-confirmation-repository.js";
 import { prisma } from "../tools/prisma.js";
 
 const EmailConfirmationRepository: IEmailConfirmationRepository = {
@@ -33,7 +36,7 @@ const EmailConfirmationRepository: IEmailConfirmationRepository = {
   },
   async findEmailConfirmationByTokenId(
     tokenId: string,
-  ): Promise<Result<Omit<EmailConfirmation, "token"> | null>> {
+  ): Promise<Result<FindEmailConfirmationReturnType>> {
     try {
       const emailConfirmation = await prisma.confirmacaoEmail.findUnique({
         where: { id_token: tokenId },
@@ -44,6 +47,7 @@ const EmailConfirmationRepository: IEmailConfirmationRepository = {
               tokenId: emailConfirmation.id_token,
               userId: emailConfirmation.usuario_id,
               exp: Math.floor(emailConfirmation.expirado_em.getTime() / 1000),
+              revoked: emailConfirmation.revogado,
             }
           : null,
       );
