@@ -41,6 +41,54 @@ export class UserRepository implements IUserRepository {
     return Result.success(userReturn as UserWithId);
   }
 
+  async update(user: User): Promise<Result<void>> {
+    if (!user.id) {
+      return Result.failure("ID do usuário não definido");
+    }
+    try {
+      await prisma.usuario.update({
+        where: { idusuario: user.id },
+        data: {
+          nome: user.firstName,
+          email_verificado: user.verifiedEmail,
+          alterado_em: new Date(),
+        },
+      });
+    } catch (error) {
+      console.error("Erro ao atualizar usuário:", error);
+      return Result.failure("Erro ao atualizar usuário");
+    }
+    return Result.success();
+  }
+
+  async findById(userId: number): Promise<Result<User | null>> {
+    let foundUser:
+      | Awaited<ReturnType<typeof prisma.usuario.findUnique>>
+      | undefined;
+    try {
+      foundUser = await prisma.usuario.findUnique({
+        where: { idusuario: userId },
+      });
+    } catch (error) {
+      console.error("Erro ao buscar usuário:", error);
+      return Result.failure("Erro ao buscar usuário");
+    }
+    if (!foundUser) {
+      return Result.success(null);
+    }
+    const user = new User(
+      foundUser.nomeusuario,
+      foundUser.nome,
+      foundUser.email,
+      foundUser.criado_em,
+      foundUser.alterado_em,
+      new Argon2idHasher(),
+    );
+    user.id = foundUser.idusuario;
+    user.password = foundUser.senha;
+    return Result.success(user);
+  }
+
   async findByUsername(username: string): Promise<Result<User | null>> {
     let foundUser:
       | Awaited<ReturnType<typeof prisma.usuario.findUnique>>
