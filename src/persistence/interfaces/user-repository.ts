@@ -8,4 +8,5 @@ export interface IUserRepository {
   update(user: User): Promise<Result<void>>;
   findByUsername(username: string): Promise<Result<UserWithId | null>>;
   findById(userId: number): Promise<Result<UserWithId | null>>;
+  confirmEmail(userId: number, tokenId: string): Promise<Result<void>>;
 }

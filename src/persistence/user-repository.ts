@@ -117,4 +117,28 @@ export class UserRepository implements IUserRepository {
     user.password = foundUser.senha;
     return Result.success(user as UserWithId);
   }
+
+  async confirmEmail(userId: number, tokenId: string): Promise<Result<void>> {
+    try {
+      await prisma.$transaction([
+        prisma.usuario.update({
+          where: { idusuario: userId },
+          data: { email_verificado: true },
+        }),
+        prisma.confirmacaoEmail.update({
+          where: { id_token: tokenId },
+          data: { revogado: true },
+        }),
+      ]);
+      return Result.success();
+    } catch (error) {
+      let errorMessage = "Erro ao confirmar email: ";
+      if (error instanceof Error) {
+        errorMessage += error.message;
+      } else {
+        errorMessage += String(error);
+      }
+      return Result.failure(errorMessage);
+    }
+  }
 }

@@ -138,11 +138,14 @@ async function confirmUserEmail(token: string): Promise<Result<void>> {
   }
   const user = userResult.data;
   user.verifiedEmail = true;
-  const updateResult = await userRepository.update(user);
-  if (!updateResult.ok) {
+  const confirmationResult = await userRepository.confirmEmail(
+    user.id,
+    findResult.data.tokenId,
+  );
+  if (!confirmationResult.ok) {
     console.error(
       "Erro ao salvar estado de verificação do usuário no banco de dados:",
-      updateResult.error,
+      confirmationResult.error,
     );
     return Result.failure("Não foi possível confirmar o email do usuário");
   }
