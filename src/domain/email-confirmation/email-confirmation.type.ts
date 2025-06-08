@@ -3,4 +3,5 @@ export interface EmailConfirmation {
   tokenId: string;
   userId: number;
   exp: number;
+  revoked?: boolean;
 }
