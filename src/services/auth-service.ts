@@ -5,8 +5,9 @@ import { Result } from "../tools/result.js";
 import { JwtEmailConfirmationAuthority } from "../domain/email-confirmation/jwt-email-confirmation-authority.js";
 import { EmailConfirmationRepository } from "../persistence/email-confirmation-repository.js";
 
-const { issueToken } = JwtEmailConfirmationAuthority;
-const { createEmailConfirmation } = EmailConfirmationRepository;
+const { issueToken, validateToken } = JwtEmailConfirmationAuthority;
+const { createEmailConfirmation, findEmailConfirmationByTokenId } =
+  EmailConfirmationRepository;
 
 async function signup(
   username: string,
@@ -88,4 +89,58 @@ async function issueConfirmationToken(userId: number): Promise<Result<string>> {
   return Result.success(tokenResult.data.token);
 }
 
-export { signup, signin, issueConfirmationToken };
+async function confirmUserEmail(token: string): Promise<Result<void>> {
+  if (!process.env.JWT_SECRET) {
+    console.error("JWT_SECRET não está definido");
+    return Result.failure("Não foi possível confirmar o email do usuário");
+  }
+  const validationResult = validateToken(token, process.env.JWT_SECRET);
+  if (
+    !validationResult.ok ||
+    !validationResult.data ||
+    !validationResult.data.isValid ||
+    !validationResult.data.payload
+  ) {
+    console.error(
+      "Erro ao validar token de confirmação:",
+      validationResult.error,
+    );
+    return Result.failure("Não foi possível confirmar o email do usuário");
+  }
+  const findResult = await findEmailConfirmationByTokenId(
+    validationResult.data.payload.tokenId,
+  );
+  if (!findResult.ok || !findResult.data) {
+    console.error(
+      "Erro ao buscar confirmação no banco de dados:",
+      findResult.error,
+    );
+    return Result.failure("Não foi possível confirmar o email do usuário");
+  }
+  if (findResult.data.userId !== validationResult.data.payload.userId) {
+    console.error("Usuário do token não corresponde ao usuário da confirmação");
+    return Result.failure("Não foi possível confirmar o email do usuário");
+  }
+  const userRepository = new UserRepository();
+  const userResult = await userRepository.findById(findResult.data.userId);
+  if (!userResult.ok || !userResult.data) {
+    console.error(
+      "Erro ao buscar confirmação no banco de dados:",
+      userResult.error,
+    );
+    return Result.failure("Não foi possível confirmar o email do usuário");
+  }
+  const user = userResult.data;
+  user.verifiedEmail = true;
+  const updateResult = await userRepository.update(user);
+  if (!updateResult.ok) {
+    console.error(
+      "Erro ao salvar estado de verificação do usuário no banco de dados:",
+      updateResult.error,
+    );
+    return Result.failure("Não foi possível confirmar o email do usuário");
+  }
+  return Result.success();
+}
+
+export { signup, signin, issueConfirmationToken, confirmUserEmail };
