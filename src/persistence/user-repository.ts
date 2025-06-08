@@ -2,9 +2,10 @@ import { User } from "../domain/user/user.js";
 import { Argon2idHasher } from "../tools/argon2idHasher.js";
 import { prisma } from "../tools/prisma.js";
 import { Result } from "../tools/result.js";
-import { IUserRepository } from "./interfaces/user-repository.js";
-
-type UserWithId = Omit<User, "id"> & { id: number };
+import {
+  IUserRepository,
+  type UserWithId,
+} from "./interfaces/user-repository.js";
 
 export class UserRepository implements IUserRepository {
   async create(user: User): Promise<Result<UserWithId>> {
@@ -61,7 +62,7 @@ export class UserRepository implements IUserRepository {
     return Result.success();
   }
 
-  async findById(userId: number): Promise<Result<User | null>> {
+  async findById(userId: number): Promise<Result<UserWithId | null>> {
     let foundUser:
       | Awaited<ReturnType<typeof prisma.usuario.findUnique>>
       | undefined;
@@ -86,10 +87,10 @@ export class UserRepository implements IUserRepository {
     );
     user.id = foundUser.idusuario;
     user.password = foundUser.senha;
-    return Result.success(user);
+    return Result.success(user as UserWithId);
   }
 
-  async findByUsername(username: string): Promise<Result<User | null>> {
+  async findByUsername(username: string): Promise<Result<UserWithId | null>> {
     let foundUser:
       | Awaited<ReturnType<typeof prisma.usuario.findUnique>>
       | undefined;
@@ -114,6 +115,6 @@ export class UserRepository implements IUserRepository {
     );
     user.id = foundUser.idusuario;
     user.password = foundUser.senha;
-    return Result.success(user);
+    return Result.success(user as UserWithId);
   }
 }
