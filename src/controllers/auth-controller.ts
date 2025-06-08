@@ -4,6 +4,7 @@ import {
   signup as doSignup,
   signin as doSignin,
   issueConfirmationToken,
+  confirmUserEmail,
 } from "../services/auth-service.js";
 
 async function signup(req: Request, res: Response) {
@@ -54,4 +55,20 @@ async function sendEmailConfirmation(req: Request, res: Response) {
   res.status(200).json({ token: emailConfirmationToken.data });
 }
 
-export { signup, signin, sendEmailConfirmation };
+async function confirmEmail(req: Request, res: Response) {
+  const { token } = req.body;
+  if (!token) {
+    return res.status(400).json({
+      error: "Campo token obrigatório",
+    });
+  }
+  const result = await confirmUserEmail(token);
+  if (!result.ok) {
+    return res.status(500).json({
+      error: result.error,
+    });
+  }
+  res.status(200).json({ message: "Email confirmado com sucesso" });
+}
+
+export { signup, signin, sendEmailConfirmation, confirmEmail };
