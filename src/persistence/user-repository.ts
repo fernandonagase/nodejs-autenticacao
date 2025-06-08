@@ -4,8 +4,10 @@ import { prisma } from "../tools/prisma.js";
 import { Result } from "../tools/result.js";
 import { IUserRepository } from "./interfaces/user-repository.js";
 
+type UserWithId = Omit<User, "id"> & { id: number };
+
 export class UserRepository implements IUserRepository {
-  async create(user: User): Promise<Result<User>> {
+  async create(user: User): Promise<Result<UserWithId>> {
     if (!user.password) {
       return Result.failure("Senha não definida para o usuário");
     }
@@ -36,7 +38,7 @@ export class UserRepository implements IUserRepository {
       new Argon2idHasher(),
     );
     userReturn.id = createdUser.idusuario;
-    return Result.success(userReturn);
+    return Result.success(userReturn as UserWithId);
   }
 
   async findByUsername(username: string): Promise<Result<User | null>> {
