@@ -31,6 +31,27 @@ const EmailConfirmationRepository: IEmailConfirmationRepository = {
     }
     return Result.success();
   },
+  async findEmailConfirmationByTokenId(
+    tokenId: string,
+  ): Promise<Result<Omit<EmailConfirmation, "token"> | null>> {
+    try {
+      const emailConfirmation = await prisma.confirmacaoEmail.findUnique({
+        where: { id_token: tokenId },
+      });
+      return Result.success(
+        emailConfirmation
+          ? {
+              tokenId: emailConfirmation.id_token,
+              userId: emailConfirmation.usuario_id,
+              exp: Math.floor(emailConfirmation.expirado_em.getTime() / 1000),
+            }
+          : null,
+      );
+    } catch (error) {
+      console.error("Erro ao buscar confirmação de email:", error);
+      return Result.failure("Erro ao buscar confirmação de email");
+    }
+  },
 };
 
 export { EmailConfirmationRepository };
