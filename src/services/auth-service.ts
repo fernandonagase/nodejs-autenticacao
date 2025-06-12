@@ -4,10 +4,12 @@ import { Argon2idHasher } from "../tools/argon2idHasher.js";
 import { Result } from "../tools/result.js";
 import { JwtEmailConfirmationAuthority } from "../domain/email-confirmation/jwt-email-confirmation-authority.js";
 import { EmailConfirmationRepository } from "../persistence/email-confirmation-repository.js";
+import { MailtrapEmailService } from "./mailtrap-email-service.js";
 
 const { issueToken, validateToken } = JwtEmailConfirmationAuthority;
 const { createEmailConfirmation, findEmailConfirmationByTokenId } =
   EmailConfirmationRepository;
+const { sendEmail } = MailtrapEmailService;
 
 async function signup(
   username: string,
@@ -33,11 +35,26 @@ async function signup(
   if (!userResult.ok) {
     return Result.failure(userResult.error ?? "Falha ao criar usuário");
   }
-  if (userResult.data) {
-    const emailConfirmationToken = await issueConfirmationToken(
-      userResult.data.id,
+  if (!userResult.data) {
+    return Result.failure("Não foi possível obter os dados do usuário");
+  }
+  const emailConfirmationToken = await issueConfirmationToken(
+    userResult.data.id,
+  );
+  if (!emailConfirmationToken.ok || !emailConfirmationToken.data) {
+    return Result.failure(
+      emailConfirmationToken.error ??
+        "Não foi possível emitir o token de confirmação",
     );
-    console.log(emailConfirmationToken);
+  }
+  const sendEmailResult = await sendConfirmationEmail(
+    userResult.data.email,
+    emailConfirmationToken.data,
+  );
+  if (!sendEmailResult.ok) {
+    return Result.failure(
+      sendEmailResult.error ?? "Não foi possível enviar o email de confirmação",
+    );
   }
   return Result.success(userResult.data);
 }
@@ -87,6 +104,21 @@ async function issueConfirmationToken(userId: number): Promise<Result<string>> {
     return Result.failure("Não foi possível emitir o token de confirmação");
   }
   return Result.success(tokenResult.data.token);
+}
+
+async function sendConfirmationEmail(
+  email: string,
+  token: string,
+): Promise<Result<void>> {
+  if (!process.env.FRONTEND_URL) {
+    console.error("FRONTEND_URL não está definida");
+    return Result.failure("Não foi possível enviar o email de confirmação");
+  }
+  return sendEmail(
+    email,
+    "Confirmação de Email",
+    `Por favor, confirme seu email clicando no link: ${process.env.FRONTEND_URL}/confirm-email?token=${token}`,
+  );
 }
 
 async function confirmUserEmail(token: string): Promise<Result<void>> {
