@@ -1,3 +1,7 @@
+import { join, dirname } from "path";
+import { readFile } from "fs/promises";
+import { fileURLToPath } from "url";
+
 import { User } from "../domain/user/user.js";
 import { UserRepository } from "../persistence/user-repository.js";
 import { Argon2idHasher } from "../tools/argon2idHasher.js";
@@ -114,11 +118,29 @@ async function sendConfirmationEmail(
     console.error("FRONTEND_URL não está definida");
     return Result.failure("Não foi possível enviar o email de confirmação");
   }
-  return sendEmail(
-    email,
-    "Confirmação de Email",
-    `Por favor, confirme seu email clicando no link: ${process.env.FRONTEND_URL}/confirm-email?token=${token}`,
+
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  const templatePath = join(
+    __dirname,
+    "../assets/templates/email-confirmation.html",
   );
+  let html: string;
+  try {
+    html = await readFile(templatePath, "utf-8");
+  } catch (error) {
+    console.error("Erro ao ler template de email:", error);
+    return Result.failure("Não foi possível enviar o email de confirmação");
+  }
+
+  html = html
+    .replace("{{ username }}", email)
+    .replace(
+      "{{ confirmationLink }}",
+      `${process.env.FRONTEND_URL}/confirm-email?token=${token}`,
+    );
+
+  return sendEmail(email, "Confirmação de Email", html, { html: true });
 }
 
 async function confirmUserEmail(token: string): Promise<Result<void>> {

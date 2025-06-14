@@ -28,14 +28,24 @@ const MailtrapEmailService: IEmailService = {
     to: string,
     subject: string,
     body: string,
+    options?: { html: boolean },
   ): Promise<Result<void>> {
+    const { html = false } = options ?? {};
+    const emailRequest = html
+      ? {
+          from: mailtrapSender,
+          to: [{ email: to }],
+          subject,
+          html: body,
+        }
+      : {
+          from: mailtrapSender,
+          to: [{ email: to }],
+          subject,
+          text: body,
+        };
     try {
-      await mailTrapClient.send({
-        from: mailtrapSender,
-        to: [{ email: to }],
-        subject,
-        text: body,
-      });
+      await mailTrapClient.send(emailRequest);
       return Result.success();
     } catch (error) {
       console.error("Erro ao enviar email:", error);
