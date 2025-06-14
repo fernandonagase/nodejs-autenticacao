@@ -33,6 +33,7 @@
   "dependencies": {
     "@prisma/client": "^6.8.2",
     "argon2": "^0.43.0",
+    "bullmq": "^5.53.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "mailtrap": "^4.1.0",
