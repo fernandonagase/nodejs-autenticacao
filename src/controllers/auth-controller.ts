@@ -4,8 +4,10 @@ import {
   signup as doSignup,
   signin as doSignin,
   issueConfirmationToken,
-  confirmUserEmail,
 } from "../services/auth-service.js";
+import { EmailConfirmationService } from "../services/email-confirmation-service.js";
+
+const { confirmUserEmail } = EmailConfirmationService;
 
 async function signup(req: Request, res: Response) {
   const { username, firstname, email, password } = req.body;
