@@ -1,11 +1,8 @@
-import { User } from "../domain/user/user.js";
+import { User, UserWithId } from "../domain/user/user.js";
 import { Argon2idHasher } from "../tools/argon2idHasher.js";
 import { prisma } from "../tools/prisma.js";
 import { Result } from "../tools/result.js";
-import {
-  IUserRepository,
-  type UserWithId,
-} from "./interfaces/user-repository.js";
+import { IUserRepository } from "./interfaces/user-repository.js";
 
 export class UserRepository implements IUserRepository {
   async create(user: User): Promise<Result<UserWithId>> {
