@@ -2,6 +2,11 @@ import { User, UserWithId } from "../domain/user/user.js";
 import { UserRepository } from "../persistence/user-repository.js";
 import { Argon2idHasher } from "../tools/argon2idHasher.js";
 import { Result } from "../tools/result.js";
+import {
+  Result as Result2,
+  resultFailure,
+  resultSuccess,
+} from "../tools/result2.js";
 import { JwtEmailConfirmationAuthority } from "../domain/email-confirmation/jwt-email-confirmation-authority.js";
 import { EmailConfirmationRepository } from "../persistence/email-confirmation-repository.js";
 import { emailQueue } from "../queues/email-queue.js";
@@ -14,7 +19,7 @@ async function signup(
   firstname: string,
   email: string,
   password: string,
-): Promise<Result<UserWithId>> {
+): Promise<Result2<UserWithId>> {
   const now = new Date();
   const user = new User(
     username,
@@ -26,21 +31,21 @@ async function signup(
   );
   const result = await user.setPassword(password);
   if (!result.ok) {
-    return Result.failure(result.error ?? "Falha ao criar usuário");
+    return resultFailure(result.error ?? "Falha ao criar usuário");
   }
   const userRepository = new UserRepository();
   const userResult = await userRepository.create(user);
   if (!userResult.ok) {
-    return Result.failure(userResult.error ?? "Falha ao criar usuário");
+    return resultFailure(userResult.error ?? "Falha ao criar usuário");
   }
   if (!userResult.data) {
-    return Result.failure("Não foi possível obter os dados do usuário");
+    return resultFailure("Não foi possível obter os dados do usuário");
   }
   const emailConfirmationToken = await issueConfirmationToken(
     userResult.data.id,
   );
   if (!emailConfirmationToken.ok || !emailConfirmationToken.data) {
-    return Result.failure(
+    return resultFailure(
       emailConfirmationToken.error ??
         "Não foi possível emitir o token de confirmação",
     );
@@ -51,7 +56,7 @@ async function signup(
     token: emailConfirmationToken.data,
   });
 
-  return Result.success(userResult.data);
+  return resultSuccess(userResult.data);
 }
 
 async function signin(
