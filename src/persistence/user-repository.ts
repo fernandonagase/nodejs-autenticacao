@@ -84,6 +84,7 @@ export class UserRepository implements IUserRepository {
     );
     user.id = foundUser.idusuario;
     user.password = foundUser.senha;
+    user.verifiedEmail = foundUser.email_verificado;
     return Result.success(user as UserWithId);
   }
 
