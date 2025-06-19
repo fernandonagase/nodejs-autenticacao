@@ -93,6 +93,17 @@ async function issueConfirmationToken(userId: number): Promise<Result<string>> {
     console.error("JWT_SECRET não está definido");
     return Result.failure("Não foi possível emitir o token de confirmação");
   }
+  const userRepository = new UserRepository();
+  const userResult = await userRepository.findById(userId);
+  if (!userResult.ok || !userResult.data) {
+    console.error("Usuário não encontrado:", userResult.error);
+    return Result.failure("Usuário não encontrado");
+  }
+  console.log(userResult.data);
+  if (userResult.data.verifiedEmail) {
+    console.error("E-mail já confirmado.");
+    return Result.failure("E-mail já confirmado.");
+  }
   const tokenResult = issueToken(userId, process.env.JWT_SECRET);
   if (!tokenResult.ok || !tokenResult.data) {
     console.error("Erro ao emitir token de confirmação:", tokenResult.error);
