@@ -6,6 +6,8 @@ import {
   issueConfirmationToken,
 } from "../services/auth-service.js";
 import { EmailConfirmationService } from "../services/email-confirmation-service.js";
+import { userToResource } from "../resources/user-resource.js";
+import { UserWithId } from "../domain/user/user.js";
 
 const { confirmUserEmail } = EmailConfirmationService;
 
@@ -22,7 +24,7 @@ async function signup(req: Request, res: Response) {
       error: result.error,
     });
   }
-  res.status(201).json(result.data);
+  res.status(201).json(userToResource(result.data as UserWithId));
 }
 
 async function signin(req: Request, res: Response) {

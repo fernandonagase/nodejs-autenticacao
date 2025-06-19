@@ -1,4 +1,4 @@
-import { User } from "../domain/user/user.js";
+import { User, UserWithId } from "../domain/user/user.js";
 import { UserRepository } from "../persistence/user-repository.js";
 import { Argon2idHasher } from "../tools/argon2idHasher.js";
 import { Result } from "../tools/result.js";
@@ -14,7 +14,7 @@ async function signup(
   firstname: string,
   email: string,
   password: string,
-): Promise<Result<User>> {
+): Promise<Result<UserWithId>> {
   const now = new Date();
   const user = new User(
     username,

@@ -95,3 +95,5 @@ export class User {
     return Result.success(token);
   }
 }
+
+export type UserWithId = Omit<User, "id"> & { id: number };
