@@ -24,6 +24,7 @@ model Usuario {
   alterado_em      DateTime           @updatedAt
   email_verificado Boolean            @default(false)
   ConfirmacaoEmail ConfirmacaoEmail[]
+  TokenRefresh     TokenRefresh[]
 }
 
 model ConfirmacaoEmail {
@@ -32,4 +33,13 @@ model ConfirmacaoEmail {
   usuario_id  Int
   expirado_em DateTime
   revogado    Boolean  @default(false)
+}
+
+model TokenRefresh {
+  id_tokenrefresh String    @id @db.Uuid
+  hash_token      Bytes
+  usuario         Usuario   @relation(fields: [usuario_id], references: [idusuario])
+  usuario_id      Int
+  expirado_em     DateTime
+  revogado_em     DateTime?
 }
