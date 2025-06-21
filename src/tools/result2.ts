@@ -18,4 +18,10 @@ function resultFailure(error: string): Result<never> {
   return { ok: false, error };
 }
 
-export { type Result, resultSuccess, resultFailure };
+export {
+  type Result,
+  type ResultOk,
+  type ResultError,
+  resultSuccess,
+  resultFailure,
+};
