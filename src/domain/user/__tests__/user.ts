@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 import { User } from "../user.js";
 import { Argon2idHasher } from "../../../tools/argon2idHasher.js";
+import { ResultError, ResultOk } from "../../../tools/result2.js";
 
 describe("Modelo de Usuario", () => {
   let user: User;
@@ -159,5 +161,39 @@ describe("Modelo de Usuario", () => {
     expect(decodedA.sub).toBe("userA@example.com");
     expect(decodedB.sub).toBe("userB@example.com");
     expect(decodedA.jti).not.toBe(decodedB.jti);
+  });
+
+  it("should generate a valid refresh token (hex string, 64 chars)", () => {
+    const user = new User(
+      "testuser",
+      "Test",
+      "test@example.com",
+      new Date(),
+      new Date(),
+      new Argon2idHasher(),
+    );
+    const result = user.issueRefreshToken();
+    expect(result.ok).toBe(true);
+    const resultSuccess = result as ResultOk<string>;
+    expect(typeof resultSuccess.data).toBe("string");
+    expect(resultSuccess.data).toMatch(/^[a-f0-9]{64}$/i);
+  });
+
+  it("should return failure if crypto.randomBytes throws", () => {
+    const user = new User(
+      "testuser",
+      "Test",
+      "test@example.com",
+      new Date(),
+      new Date(),
+      new Argon2idHasher(),
+    );
+    jest.spyOn(crypto, "randomBytes").mockImplementationOnce(() => {
+      throw new Error("Random error");
+    });
+    const result = user.issueRefreshToken();
+    expect(result.ok).toBe(false);
+    const resultFailure = result as ResultError;
+    expect(resultFailure.error).toBe("Erro ao gerar refresh token");
   });
 });

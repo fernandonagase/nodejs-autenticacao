@@ -1,8 +1,14 @@
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
+import crypto from "crypto";
 
 import { Hasher } from "../../tools/interfaces/hasher.js";
 import { Result } from "../../tools/result.js";
+import {
+  Result as Result2,
+  resultFailure,
+  resultSuccess,
+} from "../../tools/result2.js";
 
 export class User {
   id?: number;
@@ -77,6 +83,18 @@ export class User {
       return Result.failure("Erro ao gerar token JWT");
     }
     return Result.success(token);
+  }
+
+  issueRefreshToken(): Result2<string> {
+    try {
+      // Gera 32 bytes aleatórios (256 bits)
+      const buffer = crypto.randomBytes(32);
+      const token = buffer.toString("hex");
+      return resultSuccess(token);
+    } catch (error) {
+      console.error("Erro ao gerar refresh token: ", error);
+      return resultFailure("Erro ao gerar refresh token");
+    }
   }
 
   generateConfirmationToken(secret: string): Result<string> {
