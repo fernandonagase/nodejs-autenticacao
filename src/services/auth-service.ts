@@ -14,6 +14,11 @@ import { emailQueue } from "../queues/email-queue.js";
 const { issueToken } = JwtEmailConfirmationAuthority;
 const { createEmailConfirmation } = EmailConfirmationRepository;
 
+interface SigninResponse {
+  accessToken: string;
+  refreshToken: string;
+}
+
 async function signup(
   username: string,
   firstname: string,
@@ -88,6 +93,47 @@ async function signin(
   return Result.success(jwtResult.data);
 }
 
+// Função utilizada para atender a rota /v2/signin
+// utiliza o conceito de refresh/access token
+async function signin2(
+  username: string,
+  password: string,
+): Promise<Result2<SigninResponse>> {
+  const userRepository = new UserRepository();
+  const invalidCredentialsMessage = "Nome de usuário ou senha incorretos";
+  const userResult = await userRepository.findByUsername(username);
+  if (!userResult.ok || !userResult.data) {
+    console.error(userResult.error);
+    return resultFailure(invalidCredentialsMessage);
+  }
+  const passwordValidationResult =
+    await userResult.data.validatePassword(password);
+  if (!passwordValidationResult.ok || !passwordValidationResult.data) {
+    console.error(passwordValidationResult.error);
+    return resultFailure(invalidCredentialsMessage);
+  }
+  const genericErrorMessage =
+    "Não foi possível fazer login, tente novamente mais tarde";
+  if (!process.env.JWT_SECRET) {
+    console.error("JWT_SECRET não está definido");
+    return resultFailure(genericErrorMessage);
+  }
+  const jwtResult = userResult.data.issueJWT(process.env.JWT_SECRET);
+  if (!jwtResult.ok || !jwtResult.data) {
+    console.error("Erro ao emitir JWT:", jwtResult.error);
+    return resultFailure(genericErrorMessage);
+  }
+  const refreshTokenResult = await registerRefreshToken(userResult.data);
+  if (!refreshTokenResult.ok) {
+    console.error("Erro ao emitir refresh token:", refreshTokenResult.error);
+    return resultFailure(genericErrorMessage);
+  }
+  return resultSuccess({
+    accessToken: jwtResult.data,
+    refreshToken: refreshTokenResult.data,
+  });
+}
+
 async function issueConfirmationToken(userId: number): Promise<Result<string>> {
   if (!process.env.JWT_SECRET) {
     console.error("JWT_SECRET não está definido");
@@ -117,4 +163,12 @@ async function issueConfirmationToken(userId: number): Promise<Result<string>> {
   return Result.success(tokenResult.data.token);
 }
 
-export { signup, signin, issueConfirmationToken };
+async function registerRefreshToken(user: User): Promise<Result2<string>> {
+  const refreshTokenResult = user.issueRefreshToken();
+  if (!refreshTokenResult.ok) {
+    return resultFailure(refreshTokenResult.error);
+  }
+  return resultSuccess(refreshTokenResult.data);
+}
+
+export { signup, signin, signin2, issueConfirmationToken };

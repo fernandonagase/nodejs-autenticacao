@@ -3,6 +3,7 @@ import express from "express";
 import {
   signup,
   signin,
+  signin2,
   sendEmailConfirmation,
   confirmEmail,
 } from "../controllers/auth-controller.js";
@@ -17,6 +18,10 @@ router.post("/signup", (req, res) => {
 
 router.post("/signin", (req, res) => {
   signin(req, res);
+});
+
+router.post("/v2/signin", (req, res) => {
+  signin2(req, res);
 });
 
 router.post("/send-email-confirmation", (req, res) => {
