@@ -68,6 +68,26 @@ async function signup(
   return resultSuccess(userResult.data);
 }
 
+async function emitNewTokens(user: UserWithId) {
+  if (!process.env.JWT_SECRET) {
+    return resultFailure("JWT_SECRET não está definido");
+  }
+  const jwtResult = user.issueJWT(process.env.JWT_SECRET);
+  if (!jwtResult.ok || !jwtResult.data) {
+    return resultFailure(
+      jwtResult.error ?? "Não foi possível renovar o token de acesso",
+    );
+  }
+  const refreshTokenResult = await registerRefreshToken(user);
+  if (!refreshTokenResult.ok) {
+    return resultFailure(refreshTokenResult.error);
+  }
+  return resultSuccess({
+    accessToken: jwtResult.data,
+    refreshToken: refreshTokenResult.data,
+  });
+}
+
 async function signin(
   username: string,
   password: string,
@@ -116,25 +136,13 @@ async function signin2(
     console.error(passwordValidationResult.error);
     return resultFailure(invalidCredentialsMessage);
   }
-  const genericErrorMessage =
-    "Não foi possível fazer login, tente novamente mais tarde";
-  if (!process.env.JWT_SECRET) {
-    console.error("JWT_SECRET não está definido");
-    return resultFailure(genericErrorMessage);
-  }
-  const jwtResult = userResult.data.issueJWT(process.env.JWT_SECRET);
-  if (!jwtResult.ok || !jwtResult.data) {
-    console.error("Erro ao emitir JWT:", jwtResult.error);
-    return resultFailure(genericErrorMessage);
-  }
-  const refreshTokenResult = await registerRefreshToken(userResult.data);
-  if (!refreshTokenResult.ok) {
-    console.error("Erro ao emitir refresh token:", refreshTokenResult.error);
-    return resultFailure(genericErrorMessage);
+  const tokensResult = await emitNewTokens(userResult.data);
+  if (!tokensResult.ok) {
+    return resultFailure(`Erro ao emitir tokens: ${tokensResult.error}`);
   }
   return resultSuccess({
-    accessToken: jwtResult.data,
-    refreshToken: refreshTokenResult.data,
+    accessToken: tokensResult.data.accessToken,
+    refreshToken: tokensResult.data.refreshToken,
   });
 }
 
