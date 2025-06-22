@@ -7,4 +7,7 @@ export interface IRefreshTokenRepository {
     userId: number,
     expiresAt: Date,
   ): Promise<Result<RefreshTokenWithId>>;
+  findRefreshTokenByHash(
+    tokenHash: string,
+  ): Promise<Result<RefreshTokenWithId | null>>;
 }

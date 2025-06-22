@@ -36,6 +36,26 @@ const RefreshTokenRepository: IRefreshTokenRepository = {
     };
     return resultSuccess(refreshTokenReturn);
   },
+  async findRefreshTokenByHash(
+    tokenHash: string,
+  ): Promise<Result<RefreshTokenWithId | null>> {
+    const foundRefreshToken = await prisma.tokenRefresh.findFirst({
+      where: {
+        hash_token: new TextEncoder().encode(tokenHash),
+      },
+    });
+    return resultSuccess(
+      foundRefreshToken
+        ? {
+            uuid: foundRefreshToken.id_tokenrefresh,
+            tokenHash: tokenHash,
+            userId: foundRefreshToken.usuario_id,
+            expiresAt: foundRefreshToken.expirado_em,
+            revokedAt: foundRefreshToken.revogado_em,
+          }
+        : null,
+    );
+  },
 };
 
 export { RefreshTokenRepository };
