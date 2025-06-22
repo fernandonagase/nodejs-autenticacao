@@ -56,6 +56,27 @@ const RefreshTokenRepository: IRefreshTokenRepository = {
         : null,
     );
   },
+  async updateRefreshToken(
+    refreshToken: RefreshTokenWithId,
+  ): Promise<Result<void>> {
+    try {
+      await prisma.tokenRefresh.update({
+        where: {
+          id_tokenrefresh: refreshToken.uuid,
+        },
+        data: {
+          // hash_token: new TextEncoder().encode(refreshToken.tokenHash),
+          // usuario_id: refreshToken.userId,
+          // expirado_em: refreshToken.expiresAt,
+          revogado_em: refreshToken.revokedAt,
+        },
+      });
+      return resultSuccess(undefined);
+    } catch (error) {
+      console.error("Erro ao atualizar refresh token:", error);
+      return resultFailure("Não foi possível atualizar o refresh token");
+    }
+  },
 };
 
 export { RefreshTokenRepository };
