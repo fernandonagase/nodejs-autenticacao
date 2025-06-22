@@ -6,6 +6,7 @@ import {
   signin2,
   sendEmailConfirmation,
   confirmEmail,
+  refreshAccessToken,
 } from "../controllers/auth-controller.js";
 
 const router = express.Router();
@@ -30,6 +31,10 @@ router.post("/send-email-confirmation", (req, res) => {
 
 router.post("/confirm-email", async (req, res) => {
   confirmEmail(req, res);
+});
+
+router.post("/refresh-token", (req, res) => {
+  refreshAccessToken(req, res);
 });
 
 export default router;

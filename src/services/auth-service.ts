@@ -16,7 +16,7 @@ import { RefreshTokenRepository } from "../persistence/refresh-token-repository.
 
 const { issueToken } = JwtEmailConfirmationAuthority;
 const { createEmailConfirmation } = EmailConfirmationRepository;
-const { createRefreshToken } = RefreshTokenRepository;
+const { createRefreshToken, findRefreshTokenByHash } = RefreshTokenRepository;
 
 interface SigninResponse {
   accessToken: string;
@@ -193,4 +193,43 @@ async function registerRefreshToken(
   return resultSuccess(refreshTokenResult.data);
 }
 
-export { signup, signin, signin2, issueConfirmationToken };
+async function refreshAccessToken(
+  refreshToken: string,
+): Promise<Result2<string>> {
+  const refreshTokenResult = await findRefreshTokenByHash(
+    crypto.createHash("sha256").update(refreshToken).digest("hex"),
+  );
+  if (!refreshTokenResult.ok) {
+    return resultFailure(refreshTokenResult.error);
+  }
+  const now = new Date();
+  // esse tipo de logica - ex.: esta expirado ou revogado - poderia estar em uma classe de modelo
+  if (
+    !refreshTokenResult.data ||
+    refreshTokenResult.data.expiresAt < now ||
+    (refreshTokenResult.data.revokedAt &&
+      refreshTokenResult.data.revokedAt < now)
+  ) {
+    return resultFailure("Refresh token inválido ou expirado");
+  }
+
+  const userRepository = new UserRepository();
+  const userResult = await userRepository.findById(
+    refreshTokenResult.data.userId,
+  );
+  if (!userResult.ok || !userResult.data) {
+    return resultFailure(userResult.error ?? "Usuário não encontrado");
+  }
+  if (!process.env.JWT_SECRET) {
+    return resultFailure("JWT_SECRET não está definido");
+  }
+  const jwtResult = userResult.data.issueJWT(process.env.JWT_SECRET);
+  if (!jwtResult.ok || !jwtResult.data) {
+    return resultFailure(
+      jwtResult.error ?? "Não foi possível renovar o token de acesso",
+    );
+  }
+  return resultSuccess(jwtResult.data);
+}
+
+export { signup, signin, signin2, issueConfirmationToken, refreshAccessToken };

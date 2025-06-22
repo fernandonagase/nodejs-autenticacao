@@ -5,6 +5,7 @@ import {
   signin as doSignin,
   signin2 as doSignin2,
   issueConfirmationToken,
+  refreshAccessToken as doRefreshAccessToken,
 } from "../services/auth-service.js";
 import { EmailConfirmationService } from "../services/email-confirmation-service.js";
 import { userToResource } from "../resources/user-resource.js";
@@ -97,4 +98,32 @@ async function confirmEmail(req: Request, res: Response) {
   res.status(200).json({ message: "Email confirmado com sucesso" });
 }
 
-export { signup, signin, signin2, sendEmailConfirmation, confirmEmail };
+async function refreshAccessToken(req: Request, res: Response) {
+  if (!req.cookies.refreshToken) {
+    return res.status(400).json({
+      error: "Campo refreshToken obrigatório",
+    });
+  }
+  const accessTokenResult = await doRefreshAccessToken(
+    req.cookies.refreshToken,
+  );
+  if (!accessTokenResult.ok) {
+    console.error(
+      "Erro ao gerar novo token de acesso:",
+      accessTokenResult.error,
+    );
+    return res.status(500).json({
+      error: "Não foi possível gerar um novo token de acesso",
+    });
+  }
+  res.status(200).json({ token: accessTokenResult.data });
+}
+
+export {
+  signup,
+  signin,
+  signin2,
+  sendEmailConfirmation,
+  confirmEmail,
+  refreshAccessToken,
+};
