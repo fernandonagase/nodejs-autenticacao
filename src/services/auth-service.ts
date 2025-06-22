@@ -18,7 +18,7 @@ const { issueToken } = JwtEmailConfirmationAuthority;
 const { createEmailConfirmation } = EmailConfirmationRepository;
 const { createRefreshToken, findRefreshTokenByHash } = RefreshTokenRepository;
 
-interface SigninResponse {
+interface TokensResponse {
   accessToken: string;
   refreshToken: string;
 }
@@ -102,7 +102,7 @@ async function signin(
 async function signin2(
   username: string,
   password: string,
-): Promise<Result2<SigninResponse>> {
+): Promise<Result2<TokensResponse>> {
   const userRepository = new UserRepository();
   const invalidCredentialsMessage = "Nome de usuário ou senha incorretos";
   const userResult = await userRepository.findByUsername(username);
