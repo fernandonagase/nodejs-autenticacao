@@ -112,19 +112,23 @@ async function refreshAccessToken(req: Request, res: Response) {
       error: "Campo refreshToken obrigatório",
     });
   }
-  const accessTokenResult = await doRefreshAccessToken(
+  const refreshAccessTokenResult = await doRefreshAccessToken(
     req.cookies.refreshToken,
   );
-  if (!accessTokenResult.ok) {
+  if (!refreshAccessTokenResult.ok) {
     console.error(
       "Erro ao gerar novo token de acesso:",
-      accessTokenResult.error,
+      refreshAccessTokenResult.error,
     );
     return res.status(500).json({
       error: "Não foi possível gerar um novo token de acesso",
     });
   }
-  res.status(200).json({ token: accessTokenResult.data });
+  respondWithTokens(
+    res,
+    refreshAccessTokenResult.data.accessToken,
+    refreshAccessTokenResult.data.refreshToken,
+  );
 }
 
 export {

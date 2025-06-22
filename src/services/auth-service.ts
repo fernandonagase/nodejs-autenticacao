@@ -16,7 +16,8 @@ import { RefreshTokenRepository } from "../persistence/refresh-token-repository.
 
 const { issueToken } = JwtEmailConfirmationAuthority;
 const { createEmailConfirmation } = EmailConfirmationRepository;
-const { createRefreshToken, findRefreshTokenByHash } = RefreshTokenRepository;
+const { createRefreshToken, findRefreshTokenByHash, updateRefreshToken } =
+  RefreshTokenRepository;
 
 interface TokensResponse {
   accessToken: string;
@@ -203,7 +204,7 @@ async function registerRefreshToken(
 
 async function refreshAccessToken(
   refreshToken: string,
-): Promise<Result2<string>> {
+): Promise<Result2<TokensResponse>> {
   const refreshTokenResult = await findRefreshTokenByHash(
     crypto.createHash("sha256").update(refreshToken).digest("hex"),
   );
@@ -220,7 +221,6 @@ async function refreshAccessToken(
   ) {
     return resultFailure("Refresh token inválido ou expirado");
   }
-
   const userRepository = new UserRepository();
   const userResult = await userRepository.findById(
     refreshTokenResult.data.userId,
@@ -228,16 +228,16 @@ async function refreshAccessToken(
   if (!userResult.ok || !userResult.data) {
     return resultFailure(userResult.error ?? "Usuário não encontrado");
   }
-  if (!process.env.JWT_SECRET) {
-    return resultFailure("JWT_SECRET não está definido");
+  const tokensResult = await emitNewTokens(userResult.data);
+  if (!tokensResult.ok) {
+    return resultFailure(tokensResult.error);
   }
-  const jwtResult = userResult.data.issueJWT(process.env.JWT_SECRET);
-  if (!jwtResult.ok || !jwtResult.data) {
-    return resultFailure(
-      jwtResult.error ?? "Não foi possível renovar o token de acesso",
-    );
+  refreshTokenResult.data.revokedAt = new Date();
+  const updateResult = await updateRefreshToken(refreshTokenResult.data);
+  if (!updateResult.ok) {
+    return resultFailure(updateResult.error);
   }
-  return resultSuccess(jwtResult.data);
+  return resultSuccess(tokensResult.data);
 }
 
 export { signup, signin, signin2, issueConfirmationToken, refreshAccessToken };
