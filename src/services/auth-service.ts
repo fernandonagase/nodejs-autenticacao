@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 import { User, UserWithId } from "../domain/user/user.js";
 import { UserRepository } from "../persistence/user-repository.js";
 import { Argon2idHasher } from "../tools/argon2idHasher.js";
@@ -10,9 +12,11 @@ import {
 import { JwtEmailConfirmationAuthority } from "../domain/email-confirmation/jwt-email-confirmation-authority.js";
 import { EmailConfirmationRepository } from "../persistence/email-confirmation-repository.js";
 import { emailQueue } from "../queues/email-queue.js";
+import { RefreshTokenRepository } from "../persistence/refresh-token-repository.js";
 
 const { issueToken } = JwtEmailConfirmationAuthority;
 const { createEmailConfirmation } = EmailConfirmationRepository;
+const { createRefreshToken } = RefreshTokenRepository;
 
 interface SigninResponse {
   accessToken: string;
@@ -163,10 +167,28 @@ async function issueConfirmationToken(userId: number): Promise<Result<string>> {
   return Result.success(tokenResult.data.token);
 }
 
-async function registerRefreshToken(user: User): Promise<Result2<string>> {
+async function registerRefreshToken(
+  user: UserWithId,
+): Promise<Result2<string>> {
   const refreshTokenResult = user.issueRefreshToken();
   if (!refreshTokenResult.ok) {
     return resultFailure(refreshTokenResult.error);
+  }
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(refreshTokenResult.data)
+    .digest("hex");
+  const refreshTokenDatabaseResult = await createRefreshToken(
+    hashedToken,
+    user.id,
+    new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+  ); // Expira em 30 dias
+  if (!refreshTokenDatabaseResult.ok) {
+    console.error(
+      "Erro ao criar refresh token no banco de dados:",
+      refreshTokenDatabaseResult.error,
+    );
+    return resultFailure("Não foi possível registrar o refresh token");
   }
   return resultSuccess(refreshTokenResult.data);
 }
