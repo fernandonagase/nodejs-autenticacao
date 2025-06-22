@@ -44,6 +44,19 @@ async function signin(req: Request, res: Response) {
   res.status(200).json({ token: result.data });
 }
 
+function respondWithTokens(
+  res: Response,
+  accessToken: string,
+  refreshToken: string,
+) {
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    // secure: true, // Use true em produção (HTTPS)
+    sameSite: "strict",
+  });
+  res.status(200).json({ token: accessToken });
+}
+
 async function signin2(req: Request, res: Response) {
   const { username, password } = req.body;
   if (!username || !password) {
@@ -58,12 +71,7 @@ async function signin2(req: Request, res: Response) {
     });
   }
   const { accessToken, refreshToken } = result.data;
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    // secure: true, // Use true em produção (HTTPS)
-    sameSite: "strict",
-  });
-  res.status(200).json({ token: accessToken });
+  respondWithTokens(res, accessToken, refreshToken);
 }
 
 async function sendEmailConfirmation(req: Request, res: Response) {
