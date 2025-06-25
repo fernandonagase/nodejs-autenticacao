@@ -13,6 +13,38 @@ const router = express.Router();
 
 router.use(express.json());
 
+/**
+ * @openapi
+ * /auth/signup:
+ *   post:
+ *     summary: "Cadastrar um novo usuário"
+ *     description: "Esta rota permite o cadastro de um novo usuário."
+ *     tags:
+ *       - Autenticação
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *               username:
+ *                 type: string
+ *               firstname:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: "Usuário cadastrado com sucesso."
+ *       400:
+ *         description: "Dados inválidos."
+ *       500:
+ *         description: "Erro interno do servidor."
+ */
 router.post("/signup", (req, res) => {
   signup(req, res);
 });
