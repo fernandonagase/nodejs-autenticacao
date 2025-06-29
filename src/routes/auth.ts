@@ -230,6 +230,35 @@ router.post("/confirm-email", async (req, res) => {
   confirmEmail(req, res);
 });
 
+/**
+ * @openapi
+ * /auth/refresh-token:
+ *   post:
+ *     summary: "Atualizar token de acesso"
+ *     description: "Atualiza o token de acesso usando o refresh token."
+ *     tags:
+ *       - Autenticação
+ *     responses:
+ *       200:
+ *         description: "Token de acesso atualizado com sucesso."
+ *         headers:
+ *           Set-Cookie:
+ *             description: "Cookie de refresh token definido."
+ *             schema:
+ *               type: string
+ *               example: refreshToken=abcde12345; Path=/; HttpOnly
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: "Dados inválidos."
+ *       500:
+ *         description: "Erro interno do servidor."
+ */
 router.post("/refresh-token", (req, res) => {
   refreshAccessToken(req, res);
 });
