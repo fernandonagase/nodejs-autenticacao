@@ -157,6 +157,38 @@ router.post("/v2/signin", (req, res) => {
   signin2(req, res);
 });
 
+/**
+ * @openapi
+ * /auth/send-email-confirmation:
+ *   post:
+ *     summary: "Enviar confirmação de e-mail"
+ *     description: "Envia um e-mail de confirmação para o usuário."
+ *     tags:
+ *       - Autenticação
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: "E-mail de confirmação enviado com sucesso."
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: "Dados inválidos."
+ *       500:
+ *         description: "Erro interno do servidor."
+ */
 router.post("/send-email-confirmation", (req, res) => {
   sendEmailConfirmation(req, res);
 });
