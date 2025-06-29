@@ -40,6 +40,28 @@ router.use(express.json());
  *     responses:
  *       201:
  *         description: "Usuário cadastrado com sucesso."
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 username:
+ *                   type: string
+ *                 firstName:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                   format: email
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
+ *                 verifiedEmail:
+ *                   type: boolean
  *       400:
  *         description: "Dados inválidos."
  *       500:
