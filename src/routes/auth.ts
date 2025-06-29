@@ -49,10 +49,88 @@ router.post("/signup", (req, res) => {
   signup(req, res);
 });
 
+/**
+ * @openapi
+ * /auth/signin:
+ *   post:
+ *     summary: "Fazer login"
+ *     deprecated: true
+ *     description: |
+ *       Gera um token JWT com base em usuário e senha.
+ *       Esta rota foi deprecada porque agora utilizamos refresh tokens para maior segurança.
+ *       Utilize a rota `/v2/signin` no lugar desta.
+ *     tags:
+ *       - Autenticação
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: "Autenticação feita com sucesso."
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: "Dados inválidos."
+ *       500:
+ *         description: "Erro interno do servidor."
+ */
 router.post("/signin", (req, res) => {
   signin(req, res);
 });
 
+/**
+ * @openapi
+ * /auth/v2/signin:
+ *   post:
+ *     summary: "Fazer login"
+ *     description: "Gera um token JWT com base em usuário e senha."
+ *     tags:
+ *       - Autenticação
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: "Autenticação feita com sucesso."
+ *         headers:
+ *           Set-Cookie:
+ *             description: "Cookie de refresh token definido."
+ *             schema:
+ *               type: string
+ *               example: refreshToken=abcde12345; Path=/; HttpOnly
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: "Dados inválidos."
+ *       500:
+ *         description: "Erro interno do servidor."
+ */
 router.post("/v2/signin", (req, res) => {
   signin2(req, res);
 });
