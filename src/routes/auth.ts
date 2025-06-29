@@ -193,6 +193,39 @@ router.post("/send-email-confirmation", (req, res) => {
   sendEmailConfirmation(req, res);
 });
 
+/**
+ * @openapi
+ * /auth/confirm-email:
+ *   post:
+ *     summary: "Confirmar e-mail"
+ *     description: "Confirma o e-mail do usuário com base no token enviado."
+ *     tags:
+ *       - Autenticação
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: "E-mail confirmado com sucesso."
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Email confirmado com sucesso"
+ *       400:
+ *         description: "Dados inválidos."
+ *       500:
+ *         description: "Erro interno do servidor."
+ */
 router.post("/confirm-email", async (req, res) => {
   confirmEmail(req, res);
 });
