@@ -177,13 +177,6 @@ router.post("/v2/signin", (req, res) => {
  *     responses:
  *       200:
  *         description: "E-mail de confirmação enviado com sucesso."
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
  *       400:
  *         description: "Dados inválidos."
  *       500:

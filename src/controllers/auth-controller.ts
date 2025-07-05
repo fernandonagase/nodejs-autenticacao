@@ -87,7 +87,7 @@ async function sendEmailConfirmation(req: Request, res: Response) {
       error: "Não foi possível enviar a confirmação de email",
     });
   }
-  res.status(200).json({ token: emailConfirmationToken.data });
+  res.status(200).end();
 }
 
 async function confirmEmail(req: Request, res: Response) {
