@@ -52,10 +52,7 @@ async function signup(
     return resultFailure("Não foi possível obter os dados do usuário");
   }
 
-  const emailResult = await sendEmailConfirmation(
-    userResult.data.id,
-    userResult.data.email,
-  );
+  const emailResult = await sendEmailConfirmation(userResult.data.id);
   if (!emailResult.ok) {
     return resultFailure(
       emailResult.error ?? "Não foi possível enviar o email de confirmação",
@@ -172,10 +169,13 @@ async function issueConfirmationToken(userId: number): Promise<Result<string>> {
   return Result.success(tokenResult.data.token);
 }
 
-async function sendEmailConfirmation(
-  userId: number,
-  userEmail: string,
-): Promise<Result2<void>> {
+async function sendEmailConfirmation(userId: number): Promise<Result2<void>> {
+  const userRepository = new UserRepository();
+  const userResult = await userRepository.findById(userId);
+  if (!userResult.ok || !userResult.data) {
+    return resultFailure(userResult.error ?? "Usuário não encontrado");
+  }
+  const userEmail = userResult.data.email;
   const emailConfirmationToken = await issueConfirmationToken(userId);
   if (!emailConfirmationToken.ok || !emailConfirmationToken.data) {
     return resultFailure(
@@ -258,4 +258,11 @@ async function refreshAccessToken(
   return resultSuccess(tokensResult.data);
 }
 
-export { signup, signin, signin2, issueConfirmationToken, refreshAccessToken };
+export {
+  signup,
+  signin,
+  signin2,
+  issueConfirmationToken,
+  sendEmailConfirmation,
+  refreshAccessToken,
+};
