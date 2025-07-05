@@ -4,7 +4,7 @@ import {
   signup as doSignup,
   signin as doSignin,
   signin2 as doSignin2,
-  issueConfirmationToken,
+  sendEmailConfirmation as doSendEmailConfirmation,
   refreshAccessToken as doRefreshAccessToken,
 } from "../services/auth-service.js";
 import { EmailConfirmationService } from "../services/email-confirmation-service.js";
@@ -81,8 +81,8 @@ async function sendEmailConfirmation(req: Request, res: Response) {
       error: "Campo userId obrigatório",
     });
   }
-  const emailConfirmationToken = await issueConfirmationToken(userId);
-  if (!emailConfirmationToken.ok) {
+  const emailConfirmationResult = await doSendEmailConfirmation(userId);
+  if (!emailConfirmationResult.ok) {
     return res.status(500).json({
       error: "Não foi possível enviar a confirmação de email",
     });
