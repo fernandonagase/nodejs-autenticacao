@@ -51,20 +51,16 @@ async function signup(
   if (!userResult.data) {
     return resultFailure("Não foi possível obter os dados do usuário");
   }
-  const emailConfirmationToken = await issueConfirmationToken(
+
+  const emailResult = await sendEmailConfirmation(
     userResult.data.id,
+    userResult.data.email,
   );
-  if (!emailConfirmationToken.ok || !emailConfirmationToken.data) {
+  if (!emailResult.ok) {
     return resultFailure(
-      emailConfirmationToken.error ??
-        "Não foi possível emitir o token de confirmação",
+      emailResult.error ?? "Não foi possível enviar o email de confirmação",
     );
   }
-
-  await emailQueue.add("send-welcome-email", {
-    email: userResult.data.email,
-    token: emailConfirmationToken.data,
-  });
 
   return resultSuccess(userResult.data);
 }
@@ -174,6 +170,28 @@ async function issueConfirmationToken(userId: number): Promise<Result<string>> {
     return Result.failure("Não foi possível emitir o token de confirmação");
   }
   return Result.success(tokenResult.data.token);
+}
+
+async function sendEmailConfirmation(
+  userId: number,
+  userEmail: string,
+): Promise<Result2<void>> {
+  const emailConfirmationToken = await issueConfirmationToken(userId);
+  if (!emailConfirmationToken.ok || !emailConfirmationToken.data) {
+    return resultFailure(
+      emailConfirmationToken.error ??
+        "Não foi possível emitir o token de confirmação",
+    );
+  }
+  try {
+    await emailQueue.add("send-welcome-email", {
+      email: userEmail,
+      token: emailConfirmationToken.data,
+    });
+  } catch (error) {
+    return resultFailure(`Erro ao enviar email de confirmação: ${error}`);
+  }
+  return resultSuccess();
 }
 
 async function registerRefreshToken(
