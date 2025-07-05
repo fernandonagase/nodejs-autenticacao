@@ -10,8 +10,10 @@ interface ResultError {
 
 type Result<T> = ResultOk<T> | ResultError;
 
-function resultSuccess<T>(data: T): Result<T> {
-  return { ok: true, data };
+function resultSuccess<T>(data: T): Result<T>;
+function resultSuccess(): Result<void>;
+function resultSuccess<T>(data?: T): Result<T | void> {
+  return { ok: true, data: data as T | void };
 }
 
 function resultFailure(error: string): Result<never> {
