@@ -1,7 +1,7 @@
 import { MailtrapClient } from "mailtrap";
 
 import { IEmailService } from "./interfaces/email-service.js";
-import { Result } from "../tools/result.js";
+import { Result, resultFailure, resultSuccess } from "../tools/result2.js";
 
 if (!process.env.MAILTRAP_API_TOKEN) {
   throw new Error(
@@ -46,10 +46,10 @@ const MailtrapEmailService: IEmailService = {
         };
     try {
       await mailTrapClient.send(emailRequest);
-      return Result.success();
+      return resultSuccess();
     } catch (error) {
       console.error("Erro ao enviar email:", error);
-      return Result.failure("Erro ao enviar email");
+      return resultFailure("Erro ao enviar email");
     }
   },
 };
