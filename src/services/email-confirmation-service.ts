@@ -53,16 +53,15 @@ const EmailConfirmationService: IEmailConfirmationService = {
       return Result.failure("Não foi possível confirmar o email do usuário");
     }
     const validationResult = validateToken(token, process.env.JWT_SECRET);
-    if (
-      !validationResult.ok ||
-      !validationResult.data ||
-      !validationResult.data.isValid ||
-      !validationResult.data.payload
-    ) {
+    if (!validationResult.ok) {
       console.error(
         "Erro ao validar token de confirmação:",
         validationResult.error,
       );
+      return Result.failure("Não foi possível confirmar o email do usuário");
+    }
+    if (!validationResult.data.isValid || !validationResult.data.payload) {
+      console.error("Token de confirmação inválido ou mal-formado");
       return Result.failure("Não foi possível confirmar o email do usuário");
     }
     const findResult = await findEmailConfirmationByTokenId(

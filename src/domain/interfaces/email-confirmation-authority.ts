@@ -1,4 +1,4 @@
-import { Result } from "../../tools/result.js";
+import { Result } from "../../tools/result2.js";
 import { EmailConfirmation } from "../email-confirmation/email-confirmation.type.js";
 
 export interface IEmailConfirmationAuthority {

@@ -157,7 +157,7 @@ async function issueConfirmationToken(userId: number): Promise<Result<string>> {
     return Result.failure("E-mail já confirmado.");
   }
   const tokenResult = issueToken(userId, process.env.JWT_SECRET);
-  if (!tokenResult.ok || !tokenResult.data) {
+  if (!tokenResult.ok) {
     console.error("Erro ao emitir token de confirmação:", tokenResult.error);
     return Result.failure("Não foi possível emitir o token de confirmação");
   }

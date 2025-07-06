@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
-import { Result } from "../../tools/result.js";
+import { Result, resultFailure, resultSuccess } from "../../tools/result2.js";
 import { IEmailConfirmationAuthority } from "../interfaces/email-confirmation-authority.js";
 import { EmailConfirmation } from "./email-confirmation.type.js";
 
@@ -13,7 +13,7 @@ const JwtEmailConfirmationAuthority: IEmailConfirmationAuthority = {
       exp: Math.floor(Date.now() / 1000) + 3600, // 1 hora
     };
     try {
-      return Result.success({
+      return resultSuccess({
         token: jwt.sign(payload, secret),
         tokenId: payload.jti,
         userId: payload.sub,
@@ -21,7 +21,7 @@ const JwtEmailConfirmationAuthority: IEmailConfirmationAuthority = {
       });
     } catch (error) {
       console.error("Erro ao gerar token de confirmação: ", error);
-      return Result.failure("Erro ao gerar token de confirmação");
+      return resultFailure("Erro ao gerar token de confirmação");
     }
   },
   validateToken(
@@ -33,10 +33,10 @@ const JwtEmailConfirmationAuthority: IEmailConfirmationAuthority = {
       decoded = jwt.verify(token, secret) as jwt.JwtPayload;
     } catch (error) {
       console.error("Erro ao validar token de confirmação: ", error);
-      return Result.failure("Token de confirmação inválido");
+      return resultFailure("Token de confirmação inválido");
     }
     if (decoded && decoded.jti && !isNaN(Number(decoded.sub)) && decoded.exp) {
-      return Result.success({
+      return resultSuccess({
         isValid: true,
         payload: {
           token,
@@ -46,7 +46,7 @@ const JwtEmailConfirmationAuthority: IEmailConfirmationAuthority = {
         },
       });
     }
-    return Result.success({ isValid: false });
+    return resultSuccess({ isValid: false });
   },
 };
 
