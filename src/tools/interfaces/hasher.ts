@@ -1,4 +1,4 @@
-import { Result } from "../result.js";
+import { Result } from "../result2.js";
 
 export interface Hasher {
   hash(data: string): Promise<Result<string>>;

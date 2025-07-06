@@ -47,7 +47,7 @@ export class User {
 
   async hashPassword(password: string): Promise<Result<string>> {
     const result = await this.hasher.hash(password);
-    return result.ok && result.data
+    return result.ok
       ? Result.success(result.data)
       : Result.failure("Erro ao criar o hash da senha");
   }
@@ -57,7 +57,7 @@ export class User {
       return Result.success(false);
     }
     const result = await this.hasher.validate(password, this.#password);
-    if (result.ok && typeof result.data === "boolean") {
+    if (result.ok) {
       return Result.success(result.data);
     }
     return Result.failure("Erro ao validar a senha");

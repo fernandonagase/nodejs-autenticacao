@@ -8,8 +8,8 @@ describe("Argon2idHasher", () => {
     const hashResult = await hasher.hash(password);
 
     expect(hashResult.ok).toBe(true);
-    expect(typeof hashResult.data).toBe("string");
-    if (hashResult.data) {
+    if (hashResult.ok) {
+      expect(typeof hashResult.data).toBe("string");
       expect(hashResult.data.length).toBeGreaterThan(0);
     }
   });
@@ -20,12 +20,13 @@ describe("Argon2idHasher", () => {
     const hashResult = await hasher.hash(password);
 
     expect(hashResult.ok).toBe(true);
-    expect(hashResult.data).not.toBeUndefined();
-
-    if (hashResult.data) {
+    if (hashResult.ok) {
+      expect(hashResult.data).not.toBeUndefined();
       const result = await hasher.validate(password, hashResult.data);
       expect(result.ok).toBe(true);
-      expect(result.data).toBe(true);
+      if (result.ok) {
+        expect(result.data).toBe(true);
+      }
     }
   });
 
