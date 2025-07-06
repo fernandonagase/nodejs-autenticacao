@@ -1,5 +1,5 @@
 import { EmailConfirmation } from "../domain/email-confirmation/email-confirmation.type.js";
-import { Result } from "../tools/result.js";
+import { Result, resultFailure, resultSuccess } from "../tools/result2.js";
 import {
   FindEmailConfirmationReturnType,
   IEmailConfirmationRepository,
@@ -30,9 +30,9 @@ const EmailConfirmationRepository: IEmailConfirmationRepository = {
       ]);
     } catch (error) {
       console.error("Erro ao criar confirmação de email:", error);
-      return Result.failure("Erro ao criar confirmação de email");
+      return resultFailure("Erro ao criar confirmação de email");
     }
-    return Result.success();
+    return resultSuccess();
   },
   async findEmailConfirmationByTokenId(
     tokenId: string,
@@ -41,7 +41,7 @@ const EmailConfirmationRepository: IEmailConfirmationRepository = {
       const emailConfirmation = await prisma.confirmacaoEmail.findUnique({
         where: { id_token: tokenId },
       });
-      return Result.success(
+      return resultSuccess(
         emailConfirmation
           ? {
               tokenId: emailConfirmation.id_token,
@@ -53,7 +53,7 @@ const EmailConfirmationRepository: IEmailConfirmationRepository = {
       );
     } catch (error) {
       console.error("Erro ao buscar confirmação de email:", error);
-      return Result.failure("Erro ao buscar confirmação de email");
+      return resultFailure("Erro ao buscar confirmação de email");
     }
   },
 };

@@ -68,11 +68,15 @@ const EmailConfirmationService: IEmailConfirmationService = {
     const findResult = await findEmailConfirmationByTokenId(
       validationResult.data.payload.tokenId,
     );
-    if (!findResult.ok || !findResult.data) {
+    if (!findResult.ok) {
       console.error(
         "Erro ao buscar confirmação no banco de dados:",
         findResult.error,
       );
+      return Result.failure("Não foi possível confirmar o email do usuário");
+    }
+    if (!findResult.data) {
+      console.error("Confirmação de email não encontrada");
       return Result.failure("Não foi possível confirmar o email do usuário");
     }
     if (findResult.data.userId !== validationResult.data.payload.userId) {

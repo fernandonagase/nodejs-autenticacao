@@ -1,5 +1,5 @@
 import { EmailConfirmation } from "../../domain/email-confirmation/email-confirmation.type.js";
-import { Result } from "../../tools/result.js";
+import { Result } from "../../tools/result2.js";
 
 export type FindEmailConfirmationReturnType =
   | (Omit<EmailConfirmation, "token" | "revoked"> & { revoked: boolean })
