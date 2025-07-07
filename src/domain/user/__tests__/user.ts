@@ -38,9 +38,11 @@ describe("Modelo de Usuario", () => {
     const hashedPassword = await user.hashPassword("password123");
 
     expect(hashedPassword.ok).toBe(true);
-    expect(typeof hashedPassword.data).toBe("string");
-    if (hashedPassword.data) {
-      expect(hashedPassword.data.length).toBeGreaterThan(0);
+    if (hashedPassword.ok) {
+      expect(typeof hashedPassword.data).toBe("string");
+      if (hashedPassword.data) {
+        expect(hashedPassword.data.length).toBeGreaterThan(0);
+      }
     }
   });
 
@@ -52,7 +54,9 @@ describe("Modelo de Usuario", () => {
     if (user.password) {
       const isValid = await user.validatePassword("password123");
       expect(isValid.ok).toBe(true);
-      expect(isValid.data).toBe(true);
+      if (isValid.ok) {
+        expect(isValid.data).toBe(true);
+      }
     }
   });
 
@@ -71,24 +75,31 @@ describe("Modelo de Usuario", () => {
     const secret = "mysecretkey-12345678-hello-jwt-testing";
     const user1Result = user.issueJWT(secret);
     expect(user1Result.ok).toBe(true);
-    if (!user1Result.data) {
-      throw new Error("Primeiro Token JWT não foi gerado");
+    if (user1Result.ok) {
+      if (!user1Result.data) {
+        throw new Error("Primeiro Token JWT não foi gerado");
+      }
+      const user1Decoded = jwt.verify(
+        user1Result.data,
+        secret,
+      ) as jwt.JwtPayload;
+      expect(user1Decoded).toHaveProperty("sub", user.id);
+      expect(user1Decoded).toHaveProperty("exp");
+      if (typeof user1Decoded.exp === "number") {
+        expect(user1Decoded.exp * 1000).toBeGreaterThan(Date.now());
+      } else {
+        throw new Error("exp não está presente no payload do JWT");
+      }
+      user.id = 2;
+      const user2Result = user.issueJWT(secret);
+      expect(user2Result.ok).toBe(true);
+      if (user2Result.ok) {
+        if (!user2Result.data) {
+          throw new Error("Segundo Token JWT não foi gerado");
+        }
+        expect(user2Result.data).not.toBe(user1Result.data);
+      }
     }
-    const user1Decoded = jwt.verify(user1Result.data, secret) as jwt.JwtPayload;
-    expect(user1Decoded).toHaveProperty("sub", user.id);
-    expect(user1Decoded).toHaveProperty("exp");
-    if (typeof user1Decoded.exp === "number") {
-      expect(user1Decoded.exp * 1000).toBeGreaterThan(Date.now());
-    } else {
-      throw new Error("exp não está presente no payload do JWT");
-    }
-    user.id = 2;
-    const user2Result = user.issueJWT(secret);
-    expect(user2Result.ok).toBe(true);
-    if (!user2Result.data) {
-      throw new Error("Segundo Token JWT não foi gerado");
-    }
-    expect(user2Result.data).not.toBe(user1Result.data);
   });
 
   it("falha se segredo não for informado", () => {
@@ -101,17 +112,19 @@ describe("Modelo de Usuario", () => {
     const secret = "mysecretkey-12345678-confirmation-jwt-testing";
     const result = user.generateConfirmationToken(secret);
     expect(result.ok).toBe(true);
-    if (!result.data || typeof result.data !== "string") {
-      throw new Error("Token de confirmação vazio");
-    }
-    const decoded = jwt.verify(result.data, secret) as jwt.JwtPayload;
-    expect(decoded).toHaveProperty("jti");
-    expect(decoded).toHaveProperty("sub");
-    expect(decoded).toHaveProperty("exp");
-    if (typeof decoded.exp === "number") {
-      expect(decoded.exp * 1000).toBeGreaterThan(Date.now());
-    } else {
-      throw new Error("exp não está presente no payload do JWT");
+    if (result.ok) {
+      if (!result.data || typeof result.data !== "string") {
+        throw new Error("Token de confirmação vazio");
+      }
+      const decoded = jwt.verify(result.data, secret) as jwt.JwtPayload;
+      expect(decoded).toHaveProperty("jti");
+      expect(decoded).toHaveProperty("sub");
+      expect(decoded).toHaveProperty("exp");
+      if (typeof decoded.exp === "number") {
+        expect(decoded.exp * 1000).toBeGreaterThan(Date.now());
+      } else {
+        throw new Error("exp não está presente no payload do JWT");
+      }
     }
   });
 
@@ -147,20 +160,22 @@ describe("Modelo de Usuario", () => {
 
     expect(tokenA.ok).toBe(true);
     expect(tokenB.ok).toBe(true);
-    expect(tokenA.data).not.toBe(tokenB.data);
+    if (tokenA.ok && tokenB.ok) {
+      expect(tokenA.data).not.toBe(tokenB.data);
 
-    const decodedA = jwt.verify(
-      tokenA.data as string,
-      secret,
-    ) as jwt.JwtPayload;
-    const decodedB = jwt.verify(
-      tokenB.data as string,
-      secret,
-    ) as jwt.JwtPayload;
+      const decodedA = jwt.verify(
+        tokenA.data as string,
+        secret,
+      ) as jwt.JwtPayload;
+      const decodedB = jwt.verify(
+        tokenB.data as string,
+        secret,
+      ) as jwt.JwtPayload;
 
-    expect(decodedA.sub).toBe("userA@example.com");
-    expect(decodedB.sub).toBe("userB@example.com");
-    expect(decodedA.jti).not.toBe(decodedB.jti);
+      expect(decodedA.sub).toBe("userA@example.com");
+      expect(decodedB.sub).toBe("userB@example.com");
+      expect(decodedA.jti).not.toBe(decodedB.jti);
+    }
   });
 
   it("should generate a valid refresh token (hex string, 64 chars)", () => {

@@ -62,7 +62,7 @@ async function emitNewTokens(user: UserWithId) {
     return resultFailure("JWT_SECRET não está definido");
   }
   const jwtResult = user.issueJWT(process.env.JWT_SECRET);
-  if (!jwtResult.ok || !jwtResult.data) {
+  if (!jwtResult.ok) {
     return resultFailure(
       jwtResult.error ?? "Não foi possível renovar o token de acesso",
     );
@@ -102,7 +102,7 @@ async function signin(
     return resultFailure(genericErrorMessage);
   }
   const jwtResult = userResult.data.issueJWT(process.env.JWT_SECRET);
-  if (!jwtResult.ok || !jwtResult.data) {
+  if (!jwtResult.ok) {
     console.error("Erro ao emitir JWT:", jwtResult.error);
     return resultFailure(genericErrorMessage);
   }
@@ -128,8 +128,12 @@ async function signin2(
   }
   const passwordValidationResult =
     await userResult.data.validatePassword(password);
-  if (!passwordValidationResult.ok || !passwordValidationResult.data) {
+  if (!passwordValidationResult.ok) {
     console.error(passwordValidationResult.error);
+    return resultFailure(invalidCredentialsMessage);
+  }
+  if (!passwordValidationResult.data) {
+    console.error("Senha inválida");
     return resultFailure(invalidCredentialsMessage);
   }
   const tokensResult = await emitNewTokens(userResult.data);
