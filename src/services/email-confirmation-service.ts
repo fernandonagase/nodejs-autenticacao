@@ -92,11 +92,15 @@ const EmailConfirmationService: IEmailConfirmationService = {
     }
     const userRepository = new UserRepository();
     const userResult = await userRepository.findById(findResult.data.userId);
-    if (!userResult.ok || !userResult.data) {
+    if (!userResult.ok) {
       console.error(
         "Erro ao buscar confirmação no banco de dados:",
         userResult.error,
       );
+      return resultFailure("Não foi possível confirmar o email do usuário");
+    }
+    if (!userResult.data) {
+      console.error("Usuário não encontrado");
       return resultFailure("Não foi possível confirmar o email do usuário");
     }
     const user = userResult.data;

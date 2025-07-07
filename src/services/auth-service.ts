@@ -83,10 +83,13 @@ async function signin(
 ): Promise<Result<string>> {
   const userRepository = new UserRepository();
   const userResult = await userRepository.findByUsername(username);
-  if (!userResult.ok || !userResult.data) {
+  if (!userResult.ok) {
     return resultFailure(
       userResult.error ?? "Nome de usuário ou senha incorretos",
     );
+  }
+  if (!userResult.data) {
+    return resultFailure("Nome de usuário ou senha incorretos");
   }
   const validationResult = await userResult.data.validatePassword(password);
   if (!validationResult.ok || !validationResult.data) {
@@ -115,8 +118,12 @@ async function signin2(
   const userRepository = new UserRepository();
   const invalidCredentialsMessage = "Nome de usuário ou senha incorretos";
   const userResult = await userRepository.findByUsername(username);
-  if (!userResult.ok || !userResult.data) {
+  if (!userResult.ok) {
     console.error(userResult.error);
+    return resultFailure(invalidCredentialsMessage);
+  }
+  if (!userResult.data) {
+    console.error("Usuário não encontrado");
     return resultFailure(invalidCredentialsMessage);
   }
   const passwordValidationResult =
@@ -142,8 +149,12 @@ async function issueConfirmationToken(userId: number): Promise<Result<string>> {
   }
   const userRepository = new UserRepository();
   const userResult = await userRepository.findById(userId);
-  if (!userResult.ok || !userResult.data) {
-    console.error("Usuário não encontrado:", userResult.error);
+  if (!userResult.ok) {
+    console.error("Falha ao buscar usuário:", userResult.error);
+    return resultFailure("Usuário não encontrado");
+  }
+  if (!userResult.data) {
+    console.error("Usuário não encontrado");
     return resultFailure("Usuário não encontrado");
   }
   console.log(userResult.data);
@@ -167,8 +178,11 @@ async function issueConfirmationToken(userId: number): Promise<Result<string>> {
 async function sendEmailConfirmation(userId: number): Promise<Result<void>> {
   const userRepository = new UserRepository();
   const userResult = await userRepository.findById(userId);
-  if (!userResult.ok || !userResult.data) {
-    return resultFailure(userResult.error ?? "Usuário não encontrado");
+  if (!userResult.ok) {
+    return resultFailure(userResult.error ?? "Falha ao buscar usuário");
+  }
+  if (!userResult.data) {
+    return resultFailure("Usuário não encontrado");
   }
   const userEmail = userResult.data.email;
   const emailConfirmationToken = await issueConfirmationToken(userId);
@@ -236,8 +250,11 @@ async function refreshAccessToken(
   const userResult = await userRepository.findById(
     refreshTokenResult.data.userId,
   );
-  if (!userResult.ok || !userResult.data) {
-    return resultFailure(userResult.error ?? "Usuário não encontrado");
+  if (!userResult.ok) {
+    return resultFailure(userResult.error ?? "Falha ao buscar usuário");
+  }
+  if (!userResult.data) {
+    return resultFailure("Usuário não encontrado");
   }
   const tokensResult = await emitNewTokens(userResult.data);
   if (!tokensResult.ok) {
