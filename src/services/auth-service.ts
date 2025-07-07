@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { User, UserWithId } from "../domain/user/user.js";
 import { UserRepository } from "../persistence/user-repository.js";
 import { Argon2idHasher } from "../tools/argon2idHasher.js";
-import { Result, resultFailure, resultSuccess } from "../tools/result2.js";
+import { Result, resultFailure, resultSuccess } from "../tools/result.js";
 import { JwtEmailConfirmationAuthority } from "../domain/email-confirmation/jwt-email-confirmation-authority.js";
 import { EmailConfirmationRepository } from "../persistence/email-confirmation-repository.js";
 import { emailQueue } from "../queues/email-queue.js";

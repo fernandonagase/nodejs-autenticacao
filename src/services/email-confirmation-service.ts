@@ -3,7 +3,7 @@ import { readFile } from "fs/promises";
 import { fileURLToPath } from "url";
 
 import { IEmailConfirmationService } from "./interfaces/email-confirmation-service.js";
-import { Result, resultFailure, resultSuccess } from "../tools/result2.js";
+import { Result, resultFailure, resultSuccess } from "../tools/result.js";
 import { MailtrapEmailService } from "./mailtrap-email-service.js";
 import { UserRepository } from "../persistence/user-repository.js";
 import { JwtEmailConfirmationAuthority } from "../domain/email-confirmation/jwt-email-confirmation-authority.js";

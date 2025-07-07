@@ -1,5 +1,5 @@
 import { User, UserWithId } from "../../domain/user/user.js";
-import { Result } from "../../tools/result2.js";
+import { Result } from "../../tools/result.js";
 
 export interface IUserRepository {
   create(user: User): Promise<Result<UserWithId>>;

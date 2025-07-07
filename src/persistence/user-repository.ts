@@ -1,7 +1,7 @@
 import { User, UserWithId } from "../domain/user/user.js";
 import { Argon2idHasher } from "../tools/argon2idHasher.js";
 import { prisma } from "../tools/prisma.js";
-import { Result, resultFailure, resultSuccess } from "../tools/result2.js";
+import { Result, resultFailure, resultSuccess } from "../tools/result.js";
 import { IUserRepository } from "./interfaces/user-repository.js";
 
 export class UserRepository implements IUserRepository {

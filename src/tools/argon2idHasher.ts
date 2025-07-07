@@ -1,7 +1,7 @@
 import { hash, verify } from "argon2";
 
 import { Hasher } from "./interfaces/hasher.js";
-import { Result, resultFailure, resultSuccess } from "./result2.js";
+import { Result, resultFailure, resultSuccess } from "./result.js";
 
 export class Argon2idHasher implements Hasher {
   async hash(data: string): Promise<Result<string>> {

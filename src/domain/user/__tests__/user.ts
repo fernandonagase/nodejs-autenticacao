@@ -4,7 +4,7 @@ import crypto from "crypto";
 
 import { User } from "../user.js";
 import { Argon2idHasher } from "../../../tools/argon2idHasher.js";
-import { ResultError, ResultOk } from "../../../tools/result2.js";
+import { ResultError, ResultOk } from "../../../tools/result.js";
 
 describe("Modelo de Usuario", () => {
   let user: User;

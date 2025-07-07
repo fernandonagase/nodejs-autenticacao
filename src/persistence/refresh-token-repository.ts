@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { RefreshTokenWithId } from "../domain/refresh-token/refresh-token.type.js";
 import { prisma } from "../tools/prisma.js";
-import { Result, resultFailure, resultSuccess } from "../tools/result2.js";
+import { Result, resultFailure, resultSuccess } from "../tools/result.js";
 import { IRefreshTokenRepository } from "./interfaces/refresh-token-repository.js";
 
 const RefreshTokenRepository: IRefreshTokenRepository = {

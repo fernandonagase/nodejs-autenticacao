@@ -1,5 +1,5 @@
 import { EmailConfirmation } from "../domain/email-confirmation/email-confirmation.type.js";
-import { Result, resultFailure, resultSuccess } from "../tools/result2.js";
+import { Result, resultFailure, resultSuccess } from "../tools/result.js";
 import {
   FindEmailConfirmationReturnType,
   IEmailConfirmationRepository,

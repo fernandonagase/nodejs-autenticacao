@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 
-import { Result, resultFailure, resultSuccess } from "../../tools/result2.js";
+import { Result, resultFailure, resultSuccess } from "../../tools/result.js";
 import { IEmailConfirmationAuthority } from "../interfaces/email-confirmation-authority.js";
 import { EmailConfirmation } from "./email-confirmation.type.js";
 

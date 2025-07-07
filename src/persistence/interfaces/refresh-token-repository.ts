@@ -1,5 +1,5 @@
 import { RefreshTokenWithId } from "../../domain/refresh-token/refresh-token.type.js";
-import { Result } from "../../tools/result2.js";
+import { Result } from "../../tools/result.js";
 
 export interface IRefreshTokenRepository {
   createRefreshToken(

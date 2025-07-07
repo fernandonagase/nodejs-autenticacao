@@ -1,4 +1,4 @@
-import { Result } from "../../tools/result2.js";
+import { Result } from "../../tools/result.js";
 
 export interface IEmailService {
   sendEmail(

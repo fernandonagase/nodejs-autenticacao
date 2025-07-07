@@ -1,7 +1,7 @@
 import { MailtrapClient } from "mailtrap";
 
 import { IEmailService } from "./interfaces/email-service.js";
-import { Result, resultFailure, resultSuccess } from "../tools/result2.js";
+import { Result, resultFailure, resultSuccess } from "../tools/result.js";
 
 if (!process.env.MAILTRAP_API_TOKEN) {
   throw new Error(
