@@ -7,8 +7,9 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "dev": "nodemon --watch src --ext ts --exec node --loader ts-node/esm src/index.ts",
+    "dev:api": "nodemon --watch src --ext ts --exec node --loader ts-node/esm src/index.ts",
     "dev:email-worker": "nodemon --watch src --ext ts --exec node --loader ts-node/esm --env-file=.env src/workers/email-confirmation-worker.ts",
+    "dev": "concurrently -k -n \"api,email-worker\" -c \"blue,green\" \"npm run dev:api\" \"npm run dev:email-worker\"",
     "prisma:migrate": "prisma migrate dev --name",
     "node-ts": "node --loader ts-node/esm --env-file=.env"
   },
