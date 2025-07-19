@@ -39,13 +39,17 @@ cp env.example .env
 
 Edite o arquivo `.env` conforme necessário (banco de dados, JWT_SECRET, etc).
 
-### 4. Execute as migrações do banco de dados
+### 4. Suba o ambiente com PostgreSQL e Redis
+
+Se tiver o Docker instalado, basta executar `docker compose up -d`.
+
+### 5. Execute as migrações do banco de dados
 
 ```bash
 npx prisma migrate dev
 ```
 
-### 5. Rode o servidor de desenvolvimento
+### 6. Rode o servidor de desenvolvimento
 
 ```bash
 npm run dev
@@ -53,7 +57,7 @@ npm run dev
 
 O servidor estará disponível em `http://localhost:3000`.
 
-### 6. Acesse a documentação da API
+### 7. Acesse a documentação da API
 
 Acesse `http://localhost:3000/docs` para visualizar a documentação interativa (Swagger UI).
 
